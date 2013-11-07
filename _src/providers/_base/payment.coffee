@@ -4,7 +4,7 @@ config = require( "../../lib/config" )
 
 module.exports = class BasePayment extends require( "../../lib/basic" )
 	type: "_base"
-	constructor: ( @provider, data, options )->
+	constructor: ( @ownProvider, data, options )->
 		super( options )
 
 		@_data = {}
@@ -16,6 +16,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		else
 			@getter( "id","#{@type}:#{uuid.v1()}" )
 
+		@getter( "provider", @type )
 		@define( "amount", @_getAmount, @_setAmount )
 		@define( "currency", @_getCurrency, @_setCurrency )
 		@define( "desc", @_getDesc, @_setDesc )
@@ -26,7 +27,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		return
 
 	set: ( _k, _v )=>
-		_keys = [ "amount", "currency", "desc", "state", "pay_id" ]
+		_keys = [ "type", "amount", "currency", "desc", "state", "pay_id" ]
 		if _.isObject( _k )
 			for _ok, _ov of data when _ok in _keys
 				@set( _ok, _ov )
@@ -36,7 +37,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 
 	valueOf: =>
 		_ret = {}
-		for _k in [ "id", "amount", "currency", "desc", "state", "pay_id" ]
+		for _k in [ "id", "type", "amount", "currency", "desc", "state", "pay_id" ]
 			_ret[ _k ] = @[ _k ]
 		return _ret
 
@@ -66,6 +67,16 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 	setAuthentication: ( cb )=>
 		@_handleError( cb, "ENOTIMPLEMENTED", method: "setAuthentication" )
 		return
+
+	getUrls: =>
+		_econfig = config.get( "serverConfig" )
+		
+		_pre = if _econfig.secure then "https://" else "http://"
+		_pre += _econfig.host
+		if _econfig.port isnt 80
+			_pre += ":" + _econfig.port
+
+		return @ownProvider.main.getUrls( @id, _pre )
 
 	# (G/S)ETTER for `amount`
 	_getAmount: =>

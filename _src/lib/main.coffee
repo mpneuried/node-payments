@@ -1,6 +1,6 @@
 config = require( "./config" )
-_payments = require( "../." )
 _ = require( "lodash" )
+_payments = require( "../." )
 
 module.exports = class Payments extends require( "./basic" )
 	constructor: ( options )->
@@ -34,7 +34,23 @@ module.exports = class Payments extends require( "./basic" )
 			@initPaymentStore( new _payments.MemoryStore() )
 		else
 			@initPaymentStore( options.paymentStore )
+
+		# init the payment store
+		if not options?.express? 
+			@redir = new _payments.Redirects( @ )
+		else
+			@redir = new _payments.Redirects( @, options.express )
 		return
+
+	getUrls: ( pid = ":pid", prefix = "" )=>
+		_baseroute = config.get( "baseroute" )
+		if _.isFunction( _baseroute )
+			success: _baseroute( @, "success", pid )
+			cancel: _baseroute( @, "cancel", pid )
+		else
+			success: "#{ prefix }#{ _baseroute }success/#{ pid }"
+			cancel: "#{ prefix }#{ _baseroute }cancel/#{ pid }"
+
 
 	initPaymentStore: ( store )=>
 		# check for existing methods

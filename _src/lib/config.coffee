@@ -8,6 +8,16 @@ DEFAULT =
 		client_id: "REPLACE-THIS"
 		client_secret: "REPLACE-THIS"
 
+	baseroute: "/payment/"
+	serverConfig: 
+		port: 3000
+		listenhost: null
+		host: "localhost"
+		secure: false
+
+	express: null
+
+
 	currencies: 
 		"AUD": "float"	# Australian dollar 	
 		"CAD": "float"	# Canadian dollar 	
@@ -40,7 +50,6 @@ class Config
 		return
 
 	init: ( input )=>
-		console.log "INPUT", input
 		@config = extend( true, {}, DEFAULT, input )
 		return
 

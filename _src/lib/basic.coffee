@@ -28,7 +28,7 @@ module.exports = class Basic extends require('events').EventEmitter
 	@param {Object} options Basic config object
 
 	###
-	constructor: ( options )->
+	constructor: ( options = {} )->
 		@on "_log", @_log
 
 		@config = extend( true, {}, @defaults(), options )
