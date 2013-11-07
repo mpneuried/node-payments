@@ -1,0 +1,35 @@
+{
+	"author": "mp (www.tcs.de)",
+	"name": "node-payments",
+	"description": "A wrapper for differnet pament systems",
+	"version": "0.0.1",
+	"homepage": "https://github.com/mpneuried/node-payments",
+	"private": false,
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/mpneuried/node-payments.git"
+	},
+	"engines": {
+		"node": "> 0.8.20"
+	},
+	"main": "./index.js",
+	"scripts": {
+		"test": "grunt test"
+	},
+	"dependencies": {
+		"paypal-rest-sdk": "*",
+		"uuid": "*",
+		"lodash": "*",
+		"extend": "*",
+		"colors": "*"
+	},
+	"devDependencies": {
+		"should": "*",
+		"grunt": "0.4.x",
+
+		"grunt-regarde": "*",
+		"grunt-contrib-coffee": "*",
+		"grunt-include-replace": "*",
+		"grunt-mocha-cli": "*"
+	}
+}
