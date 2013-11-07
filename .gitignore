@@ -1,0 +1,13 @@
+*.profile
+*.lock
+*.conflict
+*.DS_Store
+*.zip
+
+.project
+.settings
+.idea
+
+/node_modules
+*.sublime*
+config_test.json
