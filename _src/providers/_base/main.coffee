@@ -6,10 +6,11 @@ module.exports = class BaseProvider extends require( "../../lib/basic" )
 
 		return
 
-	create: =>
-		payment = new @payment( @ )
+	create: ( data )=>
+		payment = new @payment( @, data )
 		payment.on "exec", @onExec
-		payment.on "success", @onSuccess
+		payment.on "approved", @onApproved
+		payment.on "dispose", @onDispose
 		return payment
 
 	onExec: ( payment )=>
@@ -17,29 +18,31 @@ module.exports = class BaseProvider extends require( "../../lib/basic" )
 			if err
 				@error( "getstore", err )
 				return
-			store.set payment.id, payment.valueOf(), ( err )=>
+			store.set payment, ( err )=>
 				if err
 					@error( "payment save", err )
 					return
-				@debug( "payment save", payment.valueOf() )
 				@passEvent( @main, "payment:exec", payment )
 				return
 			return
 		return
 
-	onSuccess: ( payment )=>
+	onApproved: ( payment )=>
 		payment.removeAllListeners()
 		@main.getStore ( err, store )=>
 			if err
 				@error( "getstore", err )
 				return
-			store.destroy payment.id, ( err )=>
+			store.set payment, ( err )=>
 				if err
-					@error( "payment destroy", err )
+					@error( "payment saved", err )
 					return
-				@debug( "payment destroyed", payment.valueOf() )
-				@main.emit( "payment:success", payment )
+				@main.emit( "payment:approved", payment )
+				@main.emit( "approved:#{payment.id}", payment )
 				return
 			return
 		return
 
+	onDispose: ( payment )=>
+		payment.removeAllListeners()
+		return 

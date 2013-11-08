@@ -18,7 +18,7 @@ module.exports = class PaypalPayment extends require( "../_base/payment" )
 		cb( null, true )
 		return
 
-	execProvider: ( auth, cb )=>
+	requestProvider: ( auth, cb )=>
 		# construct paypal JSON object
 		_urls = @getUrls()
 
@@ -41,14 +41,25 @@ module.exports = class PaypalPayment extends require( "../_base/payment" )
 			if err
 				cb( err )
 				return
-			@pay_id = response.id
+
+			@info "PAYMENT RESPONSE", JSON.stringify( response, true, 4 )
 
 			@debug "paypal payment links", response.links
 			# get the regular link
 			for link in response.links when link.rel is "approval_url"
-				cb( null, link.href )
+				cb( null, response.id, link.href )
 				return
 
-			cb( null, response.links )
+			cb( null, response.id, response.links )
+			return
+		return
+
+	executeProvider: ( token, auth, cb )=>
+		@ppClient.payment.execute @pay_id, { payer_id: @payer_id }, {}, ( err, response )=>
+			if err
+				cb( err )
+				return
+			@info "EXEC RESPONSE", JSON.stringify( response, true, 4 )
+			cb( null, response.state.toUpperCase(), response )
 			return
 		return

@@ -3,6 +3,12 @@
 		"endpoint": "api.sandbox.paypal.com",
 		"port": "",
 		"client_id": "REPLACE-THIS",
-		"client_secret": "REPLACE-THIS"
-	}	
+		"client_secret": "REPLACE-THIS",
+		"ipnTarget": "/paypal/ipn"
+	},
+	"paypalipn":{
+		"host": "localhost",
+		"port": 3001,
+		"path": "/ipn"
+	}
 }

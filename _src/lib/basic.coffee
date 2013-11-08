@@ -98,7 +98,7 @@ module.exports = class Basic extends require('events').EventEmitter
 	getter: ( prop, _get, enumerable = true )=>
 		_obj = 
 			enumerable: enumerable
-			writable: false
+			#writable: false
 
 		if _.isFunction( _get )
 			_obj.get = _get

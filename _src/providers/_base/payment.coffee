@@ -9,7 +9,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 
 		@_data = {}
 
-		@currencies = config.get( "defaultcurrency" )
+		@_currencies = config.get( "defaultcurrency" )
 
 		if data?.id?.length
 			@getter( "id","#{ data.id }" )
@@ -22,30 +22,42 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		@define( "desc", @_getDesc, @_setDesc )
 		@define( "state", @_getState, @_setState )
 		@define( "pay_id", @_getPayID, @_setPayID )
+		@define( "payer_id", @_getPayerID, @_setPayerID )
+
+		@getter( "data", @_getData, false )
 
 		@set( data )
 		return
 
-	set: ( _k, _v )=>
-		_keys = [ "type", "amount", "currency", "desc", "state", "pay_id" ]
+	set: ( _k, _v, _trigger = true )=>
+		_noSetKeys = [ "id" ]
 		if _.isObject( _k )
-			for _ok, _ov of data when _ok in _keys
-				@set( _ok, _ov )
-		else if _k in _keys and _v?
-			@[ _k ] = _v
+			for _ok, _ov of _k
+				@set( _ok, _ov, false )
+			@emit "changed", @data
+
+		else if _v? and _k not in _noSetKeys and not _.isFunction( _v )
+			@_data[ _k ] = _v
+			@emit "changed:#{ _k }", _v
+			if _trigger
+				@emit "changed", @data
 		return @
 
-	valueOf: =>
-		_ret = {}
-		for _k in [ "id", "type", "amount", "currency", "desc", "state", "pay_id" ]
-			_ret[ _k ] = @[ _k ]
-		return _ret
+	get: ( _k )=>
+		return @_data[ _k ]
+
+	valueOf: =>@data
+
+	toString: ( format = false )=>
+		if format
+			return JSON.stringify( @data, true, 4 )
+		else
+			return JSON.stringify( @data )
+
 
 	exec: ( cb )=>
 		if not @validate( cb )
 			return
-
-		@state = "EXEC"
 
 		# init the authentication
 		@setAuthentication ( err, auth )=>
@@ -54,17 +66,54 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 				return
 
 			# execute the payment
-			@execProvider auth, ( err, result )=>
+			@requestProvider auth, ( err, id, link )=>
 				if err
 					cb( err )
 					return
+				@set( "state", "CREATED" )
+				@set( "pay_id", id )
 				@emit( "exec", @ )
-				cb( null, result )
+				@emit( "dispose", @ )
+				cb( null, link )
+				return
+			return
+		return
+
+	_executePayment: ( token, cb )=>
+		if not @validate( cb )
+			return
+
+		@state = "ACCEPTED"
+
+		# init the authentication
+		@setAuthentication ( err, auth )=>
+			if err
+				cb( err )
+				return
+
+			# execute the payment
+			@executeProvider token, auth, ( err, state, result )=>
+				if err
+					cb( err )
+					return
+
+				@set( "state", state )
+				@emit( "approved", @ )
+				@emit( "dispose", @ )
+				cb( null )
 				return
 			return
 		return
 
 	setAuthentication: ( cb )=>
+		@_handleError( cb, "ENOTIMPLEMENTED", method: "setAuthentication" )
+		return
+
+	requestProvider: ( auth, cb )=>
+		@_handleError( cb, "ENOTIMPLEMENTED", method: "setAuthentication" )
+		return
+
+	executeProvider: ( auth, cb )=>
 		@_handleError( cb, "ENOTIMPLEMENTED", method: "setAuthentication" )
 		return
 
@@ -78,78 +127,85 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 
 		return @ownProvider.main.getUrls( @id, _pre )
 
+	# (G/S)ETTER for `data`
+	_getData: =>
+		return @extend( {}, @_data,
+			id: @id
+			amount: @amount
+			currency: @currency
+			provider: @provider
+			desc: @desc
+			state: @state
+			pay_id: @pay_id
+			payer_id: @payer_id
+		)
+
 	# (G/S)ETTER for `amount`
 	_getAmount: =>
-		return @_data.amount or 0
+		return @get( "amount" ) or 0
 
 	_setAmount: ( val )=>
-		@_data.amount = val
+		@set( "amount", val )
 		return
 
 	# (G/S)ETTER for `currency`
 	_getCurrency: =>
-		return @_data.currency or config.get( "defaultcurrency" )
+		return @get( "currency" ) or config.get( "defaultcurrency" )
 
 	_setCurrency: ( val )=>
-		if not @currencies[ val ]?
-			@_handleError( null, "ECURRENCYREFUSE", currency: val, avail: Object.keys( @currencies ).join( ", " ) )
+		if not @_currencies[ val ]?
+			@_handleError( null, "ECURRENCYREFUSE", currency: val, avail: Object.keys( @_currencies ).join( ", " ) )
 			return
 
-		@_data.currency = val
+		@set( "currency", val )
 		return
 
 	# (G/S)ETTER for `desc`
 	_getDesc: =>
-		return @_data.desc or ""
+		return @get( "desc" ) or ""
 
 	_setDesc: ( val )=>
 		if not _.isString( val )
 			@_handleError( null, "EDESCRIPTIONINVALID" )
 			return
 
-		@_data.desc = val
+		@set( "desc", val )
 		return
 
 	# (G/S)ETTER for `state`
 	_getState: =>
-		return @_data.state or "NEW"
+		return @get( "state" ) or "NEW"
 
 	_setState: ( val )=>
-		_states = [ "NEW", "EXEC", "PENDING", "APPROVED" ]
+		_states = [ "NEW", "CREATED", "ACCEPTED", "PENDING", "APPROVED", "PAYED" ]
 		if val in _states
-			@_data.state = val
+			@set( "state", val )
 			return
 		else
 			@warning "tried to set a invalid state: `#{val}`"
 		return
 
-	# (G/S)ETTER for `state`
-	_getState: =>
-		return @_data.state or "NEW"
-
-	_setState: ( val )=>
-		_states = [ "NEW", "EXEC", "PENDING", "APPROVED" ]
-		if val in _states
-			@_data.state = val
-			@emit "state", val
-			return
-		else
-			@warning "tried to set a invalid state: `#{val}`"
-		return
-
-	# (G/S)ETTER for `state`
+	# (G/S)ETTER for `pay_id`
 	_getPayID: =>
-		return @_data.pay_id or null
+		return @get( "pay_id" ) or null
 
 	_setPayID: ( val )=>
 		if val?.length
-			@_data.pay_id = val
-			@state = "PENDING"
+			@set( "pay_id", val )
+		return
+
+	# (G/S)ETTER for `payer_id`
+	_getPayerID: =>
+		return @get( "payer_id" ) or null
+
+	_setPayerID: ( val )=>
+		if val?.length
+			@set( "payer_id", val )
 		return
 
 	validate: ( cb )=>
 		# check and fix the amount value
-		_atype = @currencies[ @currency ]
+		_atype = @_currencies[ @currency ]
 		_amount = @amount
 		if _atype is "int"
 			@amount = parseInt( @amount, 10 )

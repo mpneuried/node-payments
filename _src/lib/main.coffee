@@ -79,12 +79,14 @@ module.exports = class Payments extends require( "./basic" )
 			@_handleError( cb, "EUINVALIDPROVIDER", type: type, types: Object.keys( @providers ) )
 		return
 
-	_createPayment: ( type, cb )=>
+	_createPayment: ()=>
+		[ args..., cb ] = arguments
+		[ type, data ] = args
 		@_provider type, ( err, _prov )=>
 			if err
 				cb( err )
 				return
-			cb( null, _prov.create() )
+			cb( null, _prov.create( data ) )
 			return
 		return
 
@@ -97,6 +99,32 @@ module.exports = class Payments extends require( "./basic" )
 
 	_getStore: ( cb )=>
 		cb( null, @pStore )
+		return
+
+	onSuccessReturn: ( id, token, payer_id, cb )=>
+		@getStore ( err, store )=>
+			if err
+				cb( err )
+				return
+			store.get id, ( err, data )=>
+				if err
+					cb( err )
+					return
+				@debug "got data from store", data
+				@createPayment data.provider, data, ( err, payment )=>
+					if err
+						cb( err )
+						return
+					payment.payer_id = payer_id
+					@debug "payment for execution", payment.valueOf()
+					payment._executePayment token, ( err )=>
+						if err
+							cb( err )
+							return
+						cb( null, payment )
+					return
+				return
+			return
 		return
 
 	ERRORS: =>

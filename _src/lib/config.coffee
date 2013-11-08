@@ -7,6 +7,7 @@ DEFAULT =
 		port: ""
 		client_id: "REPLACE-THIS"
 		client_secret: "REPLACE-THIS"
+		ipnTarget: "https://www.sandbox.paypal.com/cgi-bin/webscr?"
 
 	baseroute: "/payment/"
 	serverConfig: 

@@ -16,7 +16,14 @@ module.exports = class RedirServer extends require( "./basic" )
 
 	createExpress: =>
 		_econfig = config.get( "serverConfig" )
-		express = require( "express" )
+		try
+			express = require( "express" )
+		catch _err
+			if _err.code is "MODULE_NOT_FOUND"
+				@_handleError( null, "EMISSINGEXPRESS" )
+
+			return
+
 		@server = express()
 
 		@server.set( "title", "node-payment" )
@@ -39,9 +46,19 @@ module.exports = class RedirServer extends require( "./basic" )
 		return
 
 	onSuccess: ( req, res )=>
-		console.log "SUCCESS"
+		@main.onSuccessReturn req.params.pid, req.query.token, req.query.PayerID, ( err, payment )=>
+			if err
+				res.send( err, 500 )
+				return
+			@main.emit( "redirect:approved", res, payment )
+			return
 		return
 
 	onCancel: ( req, res )=>
 		console.log "CANCEL"
 		return
+
+
+	ERRORS: =>
+		@extend super, 
+			"EMISSINGEXPRESS": "To use a internal express you have to run `npm install express`. It's not a hard dependency to reduce node_module size for the usually used integrated version."

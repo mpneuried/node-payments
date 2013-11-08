@@ -19,6 +19,7 @@ module.exports = class MemoryStore extends require( "../basic" )
 
 	get: ( id, cb )=>
 		process.nextTick =>
+			@debug "GET. current id list", id, Object.keys( @store )
 			if @store[ id ]?
 				cb( null, @store[ id ] )
 				return
@@ -26,18 +27,18 @@ module.exports = class MemoryStore extends require( "../basic" )
 			return
 		return
 
-	set: ( id, data, cb )=>
+	set: ( payment, cb )=>
 		process.nextTick =>
-			@store[ id ] = data
-			@debug "saved", data
+			@store[ payment.id ] = payment.valueOf()
+			@debug "saved", payment.id, payment.toString()
 			cb( null )
 			return
 		return
 
-	destroy: ( id, cb )=>
+	destroy: ( payment, cb )=>
 		process.nextTick =>
-			@debug "destroy", id
-			_.omit( @store, [ id ] )
+			@debug "destroy", payment.id
+			_.omit( @store, [ payment.id ] )
 			cb( null )
 			return
 		return
