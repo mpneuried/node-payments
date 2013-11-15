@@ -21,6 +21,7 @@
 		"uuid": "*",
 		"lodash": "*",
 		"extend": "*",
+		"request": "*",
 		"colors": "*"
 	},
 	"devDependencies": {
@@ -30,6 +31,8 @@
 		"grunt-regarde": "*",
 		"grunt-contrib-coffee": "*",
 		"grunt-include-replace": "*",
-		"grunt-mocha-cli": "*"
+		"grunt-mocha-cli": "*",
+
+		"express": "*"
 	}
 }
