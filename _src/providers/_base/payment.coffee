@@ -54,6 +54,19 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		else
 			return JSON.stringify( @data )
 
+	persist: ( cb )=>
+		@ownProvider.main.getStore ( err, store )=>
+			if err
+				cb( err )
+				return
+			store.set @, ( err )=>
+				if err
+					cb( err )
+					return
+				cb( null )
+				return
+			return
+		return
 
 	exec: ( cb )=>
 		if not @validate( cb )
@@ -177,8 +190,8 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		return @get( "state" ) or "NEW"
 
 	_setState: ( val )=>
-		_states = [ "NEW", "CREATED", "ACCEPTED", "PENDING", "APPROVED", "PAYED" ]
-		if val in _states
+		_states = [ "NEW", "CREATED", "ACCEPTED", "PENDING", "APPROVED", "COMPLETED" ]
+		if val in _states and _states.indexOf( @state ) <= _states.indexOf( val ) 
 			@set( "state", val )
 			return
 		else

@@ -1,5 +1,5 @@
 {
-	"paypal": {
+	"paypalrest": {
 		"endpoint": "api.sandbox.paypal.com",
 		"port": "",
 		"client_id": "REPLACE-THIS",

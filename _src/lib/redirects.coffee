@@ -28,6 +28,7 @@ module.exports = class RedirServer extends require( "./basic" )
 
 		@server.set( "title", "node-payment" )
 		@server.use( express.logger( "dev" ) )
+		@server.use( express.bodyParser() )
 
 		@server.listen( _econfig.port, _econfig.listenhost )
 		return

@@ -10,4 +10,5 @@
 
 /node_modules
 *.sublime*
-config_test.json
+config_*.json
+!config_test_skeleton.json

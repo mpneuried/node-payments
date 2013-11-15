@@ -1,13 +1,22 @@
 DEFAULT = 
-	providers: [ "paypal" ]
+	providers: [ "paypalrest", "paypalclassic" ]
 	defaultcurrency: "EUR"
 
-	paypal: 
+	paypalrest: 
 		endpoint: "api.sandbox.paypal.com"
 		port: ""
 		client_id: "REPLACE-THIS"
 		client_secret: "REPLACE-THIS"
 		ipnTarget: "https://www.sandbox.paypal.com/cgi-bin/webscr?"
+
+	paypalclassic:
+		endpoint: "https://svcs.sandbox.paypal.com/AdaptivePayments/Pay"
+		userid: "REPLACE-THIS"
+		passowrd: "REPLACE-THIS"
+		signature: "REPLACE-THIS"
+		application_id: "APP-80W284485P519543T" # REPLACE-THIS - default value is the global sandbox id.
+		receiver_email: "REPLACE-THIS"
+		linkTemplate: "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_ap-payment&paykey=<%= payKey %>"
 
 	baseroute: "/payment/"
 	serverConfig: 

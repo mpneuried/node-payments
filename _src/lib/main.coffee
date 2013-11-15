@@ -14,6 +14,12 @@ module.exports = class Payments extends require( "./basic" )
 		@createPayment = @_waitUntil( @_createPayment )
 		@getStore = @_waitUntil( @_getStore )
 
+		# init the payment store
+		if not options?.express? 
+			@redir = new _payments.Redirects( @ )
+		else
+			@redir = new _payments.Redirects( @, options.express )
+
 		@providers = {}
 		# init internal providers
 		_providers = config.get( "providers" )
@@ -35,12 +41,10 @@ module.exports = class Payments extends require( "./basic" )
 		else
 			@initPaymentStore( options.paymentStore )
 
-		# init the payment store
-		if not options?.express? 
-			@redir = new _payments.Redirects( @ )
-		else
-			@redir = new _payments.Redirects( @, options.express )
 		return
+
+	getExpress: =>
+		return @redir.server
 
 	getUrls: ( pid = ":pid", prefix = "" )=>
 		_baseroute = config.get( "baseroute" )
@@ -102,6 +106,18 @@ module.exports = class Payments extends require( "./basic" )
 		return
 
 	onSuccessReturn: ( id, token, payer_id, cb )=>
+		@getPayment id, ( err, payment )=>
+			payment.payer_id = payer_id
+			@debug "payment for execution", payment.valueOf()
+			payment._executePayment token, ( err )=>
+				if err
+					cb( err )
+					return
+				cb( null, payment )
+			return
+		return
+
+	getPayment: ( id, cb )=>
 		@getStore ( err, store )=>
 			if err
 				cb( err )
@@ -115,13 +131,7 @@ module.exports = class Payments extends require( "./basic" )
 					if err
 						cb( err )
 						return
-					payment.payer_id = payer_id
-					@debug "payment for execution", payment.valueOf()
-					payment._executePayment token, ( err )=>
-						if err
-							cb( err )
-							return
-						cb( null, payment )
+					cb( null, payment)
 					return
 				return
 			return

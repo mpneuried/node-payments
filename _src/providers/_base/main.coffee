@@ -37,6 +37,7 @@ module.exports = class BaseProvider extends require( "../../lib/basic" )
 				if err
 					@error( "payment saved", err )
 					return
+				
 				@main.emit( "payment:approved", payment )
 				@main.emit( "approved:#{payment.id}", payment )
 				return

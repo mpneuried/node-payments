@@ -9,7 +9,10 @@ config.init( _configTest )
 
 Payments = require( "../." )
 
-paypalIPN = require( "./fakeendpoint" )
+_localtest = config.get( "paypalipn" ).listenport isnt false
+
+if _localtest
+	paypalIPN = require( "./fakeendpoint" )
 
 openBrowser = ( url )->
 	switch process.platform 
@@ -38,8 +41,8 @@ describe "=== MAIN TESTS === ", ->
 		_testPayment = null
 
 		it "create payment", ( done )->
-			@timeout 0
-			pymts.provider "paypal", ( err, paypal )=>
+			@timeout( 1000 * 60 * 5 ) # 5 minute timeout
+			pymts.provider "paypalclassic", ( err, paypal )=>
 				should.not.exist( err )
 
 				payment = paypal.create()
@@ -62,7 +65,7 @@ describe "=== MAIN TESTS === ", ->
 					done()
 					return
 
-				payment.exec ( err, link )=>
+				payment.exec ( err, link )=>				
 					should.not.exist( err )
 					#done()
 					openBrowser( link )
@@ -70,9 +73,18 @@ describe "=== MAIN TESTS === ", ->
 				return
 			return
 
-		it "send ipn", ( done )->
+		if _localtest
+			it "send ipn", ( done )->
 
-			paypalIPN.sendPaypalIPN( _testPayment )
+				paypalIPN.sendPaypalIPN( _testPayment )
+				pymts.once "completed:#{_testPayment.id}", ( _payment )=>
+					_testPayment.id.should.equal( _payment.id )
+					done()
+					return
+				return
 
+		it "keep server open", ( done )->
+			@timeout( 1000 * 60 * 5 ) # 5 minute timeout
+			return
 		return
 	return
