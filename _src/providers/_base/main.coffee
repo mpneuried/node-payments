@@ -10,6 +10,7 @@ module.exports = class BaseProvider extends require( "../../lib/basic" )
 		payment = new @payment( @, data )
 		payment.on "exec", @onExec
 		payment.on "approved", @onApproved
+		payment.on "cancel", @onCancel
 		payment.on "dispose", @onDispose
 		return payment
 
@@ -42,6 +43,12 @@ module.exports = class BaseProvider extends require( "../../lib/basic" )
 				@main.emit( "approved:#{payment.id}", payment )
 				return
 			return
+		return
+
+	onCancel: ( payment )=>
+		payment.removeAllListeners()
+		@main.emit( "payment:canceld", payment )
+		@main.emit( "canceld:#{payment.id}", payment )
 		return
 
 	onDispose: ( payment )=>

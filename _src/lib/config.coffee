@@ -10,17 +10,17 @@ DEFAULT =
 		ipnTarget: "https://www.sandbox.paypal.com/cgi-bin/webscr?"
 
 	paypalclassic:
-		endpoint: "https://svcs.sandbox.paypal.com/AdaptivePayments/Pay"
+		endpoint: "https://api-3t.sandbox.paypal.com/nvp"
 		userid: "REPLACE-THIS"
-		passowrd: "REPLACE-THIS"
+		password: "REPLACE-THIS"
 		signature: "REPLACE-THIS"
 		application_id: "APP-80W284485P519543T" # REPLACE-THIS - default value is the global sandbox id.
 		receiver_email: "REPLACE-THIS"
-		linkTemplate: "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_ap-payment&paykey=<%= payKey %>"
+		linkTemplate: "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=<%= token %>"
 
 	baseroute: "/payment/"
 	serverConfig: 
-		port: 3000
+		port: 8888
 		listenhost: null
 		host: "localhost"
 		secure: false

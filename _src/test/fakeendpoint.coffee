@@ -24,7 +24,7 @@ class PaypalIPN extends require( "../lib/basic" )
 		return @
 
 	routes: =>
-		@server.get @config.path, @ppIpnReturn
+		@server.post @config.path, @ppIpnReturn
 		return @
 
 	sendPaypalIPN: ( payment, status = "Completed" )=>
@@ -36,7 +36,7 @@ class PaypalIPN extends require( "../lib/basic" )
 		if _PmntConfig.port isnt 80
 			_host += ":" + _PmntConfig.port
 
-		_query =
+		_body =
 			# receiver
 			receiver_email: @config.receiver_email
 			receiver_id: "S8XGHLYDW9T3S"
@@ -86,12 +86,12 @@ class PaypalIPN extends require( "../lib/basic" )
 			notify_version: "2.6"
 			verify_sign: "AtkOfCXbDm2hu0ZELryHFjY-Vb7PAUvS6nMXgysbElEn9v-1XcmSoGtf"
 
-		@lastQuery = JSON.stringify( _query )
+		@lastQuery = JSON.stringify( _body )
 
 		opt = 
 			method: "POST"
-			url: _host + config.get( "paypal" ).ipnTarget
-			qs: _query
+			url: _host + config.get( "paypalipn" ).path
+			form: _body
 
 		request opt, ( err, resp, body )=>
 			if err
@@ -101,7 +101,7 @@ class PaypalIPN extends require( "../lib/basic" )
 
 	ppIpnReturn: ( req, res )=>
 		try
-			assert.deepEqual( _.omit( req.query, [ "cmd" ] ), JSON.parse( @lastQuery or "{}" ) )
+			assert.deepEqual( _.omit( req.body, [ "cmd" ] ), JSON.parse( @lastQuery or "{}" ) )
 		catch
 			res.send( "INVALID" )
 			return

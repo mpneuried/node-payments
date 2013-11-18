@@ -23,6 +23,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		@define( "state", @_getState, @_setState )
 		@define( "pay_id", @_getPayID, @_setPayID )
 		@define( "payer_id", @_getPayerID, @_setPayerID )
+		@define( "verified", @_getVerified, @_setVerified )
 
 		@getter( "data", @_getData, false )
 
@@ -63,6 +64,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 				if err
 					cb( err )
 					return
+				@info "PAYMENT Saved", @toString( true )
 				cb( null )
 				return
 			return
@@ -105,7 +107,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 				return
 
 			# execute the payment
-			@executeProvider token, auth, ( err, state, result )=>
+			@executeProvider token, auth, ( err, state )=>
 				if err
 					cb( err )
 					return
@@ -118,6 +120,16 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 			return
 		return
 
+	cancel: ( cb )=>
+		@set( "state", "CANCELD")
+		@persist ( err )=>
+			if err
+				cb( err )
+				return
+			@emit( "cancel", @ )
+			cb( null, @ )
+			return
+		return
 	setAuthentication: ( cb )=>
 		@_handleError( cb, "ENOTIMPLEMENTED", method: "setAuthentication" )
 		return
@@ -151,6 +163,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 			state: @state
 			pay_id: @pay_id
 			payer_id: @payer_id
+			verified: @verified
 		)
 
 	# (G/S)ETTER for `amount`
@@ -190,7 +203,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		return @get( "state" ) or "NEW"
 
 	_setState: ( val )=>
-		_states = [ "NEW", "CREATED", "ACCEPTED", "PENDING", "APPROVED", "COMPLETED" ]
+		_states = [ "NEW", "CREATED", "ACCEPTED", "PENDING", "APPROVED", "COMPLETED", "CANCELD", "REFUNDED" ]
 		if val in _states and _states.indexOf( @state ) <= _states.indexOf( val ) 
 			@set( "state", val )
 			return
@@ -214,6 +227,15 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 	_setPayerID: ( val )=>
 		if val?.length
 			@set( "payer_id", val )
+		return
+
+	# (G/S)ETTER for `verified`
+	_getVerified: =>
+		return @get( "verified" ) or false
+
+	_setVerified: ( val )=>
+		if val?
+			@set( "verified", val )
 		return
 
 	validate: ( cb )=>

@@ -13,6 +13,7 @@ _localtest = config.get( "paypalipn" ).listenport isnt false
 
 if _localtest
 	paypalIPN = require( "./fakeendpoint" )
+	console.log "USE LOCAL IPN TEST"
 
 openBrowser = ( url )->
 	switch process.platform 
@@ -33,6 +34,10 @@ describe "=== MAIN TESTS === ", ->
 			res.send( "APPROVED:\n\n#{payment.toString( true )}" )
 			return
 
+		pymts.on "redirect:canceld", ( res, payment )=>
+			res.send( "CANCLED:\n\n#{payment.toString( true )}" )
+			return
+
 		return
 
 
@@ -45,9 +50,11 @@ describe "=== MAIN TESTS === ", ->
 			pymts.provider "paypalclassic", ( err, paypal )=>
 				should.not.exist( err )
 
+				_amount = 0.01
+
 				payment = paypal.create()
 
-				payment.amount = 1
+				payment.amount = _amount
 				payment.desc = "Imperial Star Destroyer"
 
 				payment.set( "my_user_id", 123 )
@@ -55,12 +62,18 @@ describe "=== MAIN TESTS === ", ->
 				_id = payment.id
 
 				pymts.on "payment:approved", ( _payment )=>
-					_payment.amount.should.equal( 1 ) 
+					_payment.amount.should.equal( _amount ) 
 					_payment.get( "my_user_id" ).should.equal( 123 ) 
 					#console.log "PAYED: ", _payment.valueOf()
 					return
 
 				pymts.once "approved:#{_id}", ( _payment )=>
+					_testPayment = _payment
+					console.log "APPROVED STATE: ", _payment.state
+					done()
+					return
+
+				pymts.once "canceld:#{_id}", ( _payment )=>
 					_testPayment = _payment
 					done()
 					return
@@ -75,16 +88,33 @@ describe "=== MAIN TESTS === ", ->
 
 		if _localtest
 			it "send ipn", ( done )->
-
-				paypalIPN.sendPaypalIPN( _testPayment )
-				pymts.once "completed:#{_testPayment.id}", ( _payment )=>
-					_testPayment.id.should.equal( _payment.id )
+				if _testPayment?
+					paypalIPN.sendPaypalIPN( _testPayment )
+					pymts.once "completed:#{_testPayment.id}", ( _payment )=>
+						console.log "COMPLETED STATE: ", _payment.valueOf()
+						_testPayment.id.should.equal( _payment.id )
+						done()
+						return
+				else
+					console.log "PAYMENT CANCELD!"
 					done()
-					return
+				return
+		else
+			it "wait for IPN message", ( done )->
+				@timeout( 1000 * 60 * 5 ) # 5 minute timeout
+				if _testPayment?
+					pymts.once "completed:#{_testPayment.id}", ( _payment )=>
+						console.log "COMPLETED STATE: ", _payment.valueOf()
+						_testPayment.id.should.equal( _payment.id )
+						done()
+						return
+				else
+					console.log "PAYMENT CANCELD!"
+					done()
 				return
 
 		it "keep server open", ( done )->
-			@timeout( 1000 * 60 * 5 ) # 5 minute timeout
+			@timeout( 0 )
 			return
 		return
 	return

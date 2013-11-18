@@ -56,7 +56,12 @@ module.exports = class RedirServer extends require( "./basic" )
 		return
 
 	onCancel: ( req, res )=>
-		console.log "CANCEL"
+		@main.onCancelReturn req.params.pid, ( err, payment )=>
+			if err
+				res.send( err, 500 )
+				return
+			@main.emit( "redirect:canceld", res, payment )
+			return
 		return
 
 

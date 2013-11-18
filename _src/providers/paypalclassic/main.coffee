@@ -12,10 +12,12 @@ module.exports = class PayPalClassic extends require( "../_base/main" )
 
 	initIPN: =>
 		server = @main.getExpress()
-		server.post @_ipnCnf.path, @answer200, @verifyPayPalIpn, @ipnInput
+		server.post @_ipnCnf.receiverPath, @answer200, @verifyPayPalIpn, @ipnInput
 		return
 
 	answer200: ( req, res, next )=>
+		@info "IPN Input", req
+
 		res.send( "OK" )
 		next()
 		return
@@ -24,7 +26,7 @@ module.exports = class PayPalClassic extends require( "../_base/main" )
 		qs = _.extend( {}, req.query, cmd: "_notify-validate" )
 		opt = 
 			method: "GET"
-			url: ( if @_ipnCnf.secure then "https://" else "http://" ) + @_ipnCnf.host + ( if not @_ipnCnf.port? or @_ipnCnf.port isnt 80 then ":" + @_ipnCnf.port else "" ) + @_ipnCnf.path
+			url: ( if @_ipnCnf.secure then "https://" else "http://" ) + @_ipnCnf.host + ( if not @_ipnCnf.port? or @_ipnCnf.port isnt 80 then ":" + @_ipnCnf.port else "" ) + @_ipnCnf.ppReturnPath
 			qs: qs
 
 		request opt, ( err, resp, body )=>
@@ -53,7 +55,7 @@ module.exports = class PayPalClassic extends require( "../_base/main" )
 		if _receiver isnt @_ipnCnf.receiver_email
 			@_handleError( null, "EPPIPNINVALIDRECEIVER", { got: _receiver, needed: @_ipnCnf.receiver_email } )
 			return
-		#console.log "ipnInput", _pid, _status
+		@info "IPN Input ", _pid, _status, req.body
 
 		@main.getPayment _pid, ( err, payment )=>
 			if err
@@ -71,13 +73,14 @@ module.exports = class PayPalClassic extends require( "../_base/main" )
 				return
 
 			payment.set( "state", _status )
+			payment.set( "verified", true )
 			payment.persist ( err )=>
 				if _status is "COMPLETED"
 					if err
 						@error( err )
 						return
-					@main.emit( "payment:completed", payment )
-					@main.emit( "completed:#{payment.id}", payment )
+					@main.emit( "payment:payed", payment )
+					@main.emit( "payed:#{payment.id}", payment )
 				return
 			return
 		return

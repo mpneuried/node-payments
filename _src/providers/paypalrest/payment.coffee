@@ -1,7 +1,7 @@
 config = require( "../../lib/config" )
 
 module.exports = class PaypalPayment extends require( "../_base/payment" )
-	type: "paypal"
+	type: "paypalrest"
 
 	constructor: ->
 		@ppInited = false

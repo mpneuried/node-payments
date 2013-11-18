@@ -107,6 +107,9 @@ module.exports = class Payments extends require( "./basic" )
 
 	onSuccessReturn: ( id, token, payer_id, cb )=>
 		@getPayment id, ( err, payment )=>
+			if err
+				cb( err )
+				return
 			payment.payer_id = payer_id
 			@debug "payment for execution", payment.valueOf()
 			payment._executePayment token, ( err )=>
@@ -114,6 +117,16 @@ module.exports = class Payments extends require( "./basic" )
 					cb( err )
 					return
 				cb( null, payment )
+			return
+		return
+
+	onCancelReturn: ( id, cb )=>
+		@getPayment id, ( err, payment )=>
+			if err
+				cb( err )
+				return
+			payment.cancel( cb )
+
 			return
 		return
 
@@ -126,8 +139,10 @@ module.exports = class Payments extends require( "./basic" )
 				if err
 					cb( err )
 					return
+				if not data?
+					@_handleError( cb, "EPAYMENTNOTFOUND", id: id )
 				@debug "got data from store", data
-				@createPayment data.provider, data, ( err, payment )=>
+				@createPayment data?.provider, data, ( err, payment )=>
 					if err
 						cb( err )
 						return
@@ -139,6 +154,7 @@ module.exports = class Payments extends require( "./basic" )
 
 	ERRORS: =>
 		@extend super, 
+			"EPAYMENTNOTFOUND": "the Payment with id `<%= id %>` is not availible."
 			"EREQUIREPROVIDER": "The provider `<%= type %>` cannot be required."
 			"EUINVALIDPROVIDER": "The provider `<%= type %>` is not valid. Please use one of `<%= types %>`."
 			"ESTOREVALIDATION": "The user payment store misses a method called `.<%= method %>()`."
