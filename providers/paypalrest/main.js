@@ -117,8 +117,8 @@
               _this.error(err);
               return;
             }
-            _this.main.emit("payment:verfied", payment);
-            _this.main.emit("verfied:" + payment.id, payment);
+            _this.main.emit("payment", "verified", payment);
+            _this.main.emit("payment:" + payment.id, "verified", payment);
           }
         });
       });

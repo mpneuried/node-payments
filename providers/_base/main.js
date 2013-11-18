@@ -42,7 +42,8 @@
             _this.error("payment save", err);
             return;
           }
-          _this.passEvent(_this.main, "payment:exec", payment);
+          _this.main.emit("payment", "exec", payment);
+          _this.main.emit("payment:" + payment.id, "exec", payment);
         });
       });
     };
@@ -60,16 +61,16 @@
             _this.error("payment saved", err);
             return;
           }
-          _this.main.emit("payment:approved", payment);
-          _this.main.emit("approved:" + payment.id, payment);
+          _this.main.emit("payment", "approved", payment);
+          _this.main.emit("payment:" + payment.id, "approved", payment);
         });
       });
     };
 
     BaseProvider.prototype.onCancel = function(payment) {
       payment.removeAllListeners();
-      this.main.emit("payment:canceld", payment);
-      this.main.emit("canceld:" + payment.id, payment);
+      this.main.emit("payment", "cancel", payment);
+      this.main.emit("payment:" + payment.id, "cancel", payment);
     };
 
     BaseProvider.prototype.onDispose = function(payment) {

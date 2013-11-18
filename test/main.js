@@ -43,10 +43,10 @@
     describe("- Init -", function() {
       var _this = this;
       pymts = new Payments(_configTest);
-      pymts.on("redirect:approved", function(res, payment) {
+      pymts.on("approved", function(res, payment) {
         res.send("APPROVED:\n\n" + (payment.toString(true)));
       });
-      pymts.on("redirect:canceld", function(res, payment) {
+      pymts.on("cancel", function(res, payment) {
         res.send("CANCLED:\n\n" + (payment.toString(true)));
       });
     });
@@ -65,18 +65,24 @@
           payment.desc = "Imperial Star Destroyer";
           payment.set("my_user_id", 123);
           _id = payment.id;
-          pymts.on("payment:approved", function(_payment) {
-            _payment.amount.should.equal(_amount);
-            _payment.get("my_user_id").should.equal(123);
+          pymts.on("payment", function(type, _payment) {
+            if (type === "approved") {
+              _payment.amount.should.equal(_amount);
+              _payment.get("my_user_id").should.equal(123);
+            }
           });
-          pymts.once("approved:" + _id, function(_payment) {
-            _testPayment = _payment;
-            console.log("APPROVED STATE: ", _payment.state);
-            done();
-          });
-          pymts.once("canceld:" + _id, function(_payment) {
-            _testPayment = _payment;
-            done();
+          pymts.on("payment:" + _id, function(type, _payment) {
+            switch (type) {
+              case "approved":
+                _testPayment = _payment;
+                console.log("APPROVED STATE: ", _payment.state);
+                done();
+                return;
+              case "cancel":
+                _testPayment = _payment;
+                done();
+                return;
+            }
           });
           payment.exec(function(err, link) {
             should.not.exist(err);
@@ -89,10 +95,12 @@
           var _this = this;
           if (_testPayment != null) {
             paypalIPN.sendPaypalIPN(_testPayment);
-            pymts.once("completed:" + _testPayment.id, function(_payment) {
-              console.log("COMPLETED STATE: ", _payment.valueOf());
-              _testPayment.id.should.equal(_payment.id);
-              done();
+            pymts.once("payment:" + _testPayment.id, function(type, _payment) {
+              if (type === "completed") {
+                console.log("COMPLETED STATE: ", _payment.valueOf());
+                _testPayment.id.should.equal(_payment.id);
+                done();
+              }
             });
           } else {
             console.log("PAYMENT CANCELD!");
@@ -104,10 +112,12 @@
           var _this = this;
           this.timeout(1000 * 60 * 5);
           if (_testPayment != null) {
-            pymts.once("completed:" + _testPayment.id, function(_payment) {
-              console.log("COMPLETED STATE: ", _payment.valueOf());
-              _testPayment.id.should.equal(_payment.id);
-              done();
+            pymts.once("payment:" + _testPayment.id, function(type, _payment) {
+              if (type === "completed") {
+                console.log("COMPLETED STATE: ", _payment.valueOf());
+                _testPayment.id.should.equal(_payment.id);
+                done();
+              }
             });
           } else {
             console.log("PAYMENT CANCELD!");

@@ -51,7 +51,7 @@ module.exports = class RedirServer extends require( "./basic" )
 			if err
 				res.send( err, 500 )
 				return
-			@main.emit( "redirect:approved", res, payment )
+			@main.emit( "approved", res, payment )
 			return
 		return
 
@@ -60,7 +60,7 @@ module.exports = class RedirServer extends require( "./basic" )
 			if err
 				res.send( err, 500 )
 				return
-			@main.emit( "redirect:canceld", res, payment )
+			@main.emit( "cancel", res, payment )
 			return
 		return
 

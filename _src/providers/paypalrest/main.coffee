@@ -78,8 +78,8 @@ module.exports = class PayPalRest extends require( "../_base/main" )
 					if err
 						@error( err )
 						return
-					@main.emit( "payment:verfied", payment )
-					@main.emit( "verfied:#{payment.id}", payment )
+					@main.emit( "payment", "verified", payment )
+					@main.emit( "payment:#{payment.id}", "verified", payment )
 				return
 			return
 		return

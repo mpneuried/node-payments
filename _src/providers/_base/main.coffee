@@ -23,7 +23,9 @@ module.exports = class BaseProvider extends require( "../../lib/basic" )
 				if err
 					@error( "payment save", err )
 					return
-				@passEvent( @main, "payment:exec", payment )
+
+				@main.emit( "payment", "exec", payment )
+				@main.emit( "payment:#{payment.id}", "exec", payment )
 				return
 			return
 		return
@@ -39,16 +41,16 @@ module.exports = class BaseProvider extends require( "../../lib/basic" )
 					@error( "payment saved", err )
 					return
 				
-				@main.emit( "payment:approved", payment )
-				@main.emit( "approved:#{payment.id}", payment )
+				@main.emit( "payment", "approved", payment )
+				@main.emit( "payment:#{payment.id}", "approved", payment )
 				return
 			return
 		return
 
 	onCancel: ( payment )=>
 		payment.removeAllListeners()
-		@main.emit( "payment:canceld", payment )
-		@main.emit( "canceld:#{payment.id}", payment )
+		@main.emit( "payment", "cancel", payment )
+		@main.emit( "payment:#{payment.id}", "cancel", payment )
 		return
 
 	onDispose: ( payment )=>

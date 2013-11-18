@@ -30,11 +30,11 @@ describe "=== MAIN TESTS === ", ->
 	describe "- Init -", ->
 
 		pymts = new Payments( _configTest )
-		pymts.on "redirect:approved", ( res, payment )=>
+		pymts.on "approved", ( res, payment )=>
 			res.send( "APPROVED:\n\n#{payment.toString( true )}" )
 			return
 
-		pymts.on "redirect:canceld", ( res, payment )=>
+		pymts.on "cancel", ( res, payment )=>
 			res.send( "CANCLED:\n\n#{payment.toString( true )}" )
 			return
 
@@ -61,21 +61,25 @@ describe "=== MAIN TESTS === ", ->
 
 				_id = payment.id
 
-				pymts.on "payment:approved", ( _payment )=>
-					_payment.amount.should.equal( _amount ) 
-					_payment.get( "my_user_id" ).should.equal( 123 ) 
-					#console.log "PAYED: ", _payment.valueOf()
+				pymts.on "payment", ( type, _payment )=>
+					if type is "approved"
+						_payment.amount.should.equal( _amount ) 
+						_payment.get( "my_user_id" ).should.equal( 123 ) 
+						#console.log "PAYED: ", _payment.valueOf()
 					return
 
-				pymts.once "approved:#{_id}", ( _payment )=>
-					_testPayment = _payment
-					console.log "APPROVED STATE: ", _payment.state
-					done()
-					return
-
-				pymts.once "canceld:#{_id}", ( _payment )=>
-					_testPayment = _payment
-					done()
+				pymts.on "payment:#{_id}", ( type, _payment )=>
+					switch type
+						when "approved"
+							_testPayment = _payment
+							console.log "APPROVED STATE: ", _payment.state
+							done()
+							return
+		
+						when "cancel"
+							_testPayment = _payment
+							done()
+							return
 					return
 
 				payment.exec ( err, link )=>				
@@ -90,10 +94,11 @@ describe "=== MAIN TESTS === ", ->
 			it "send ipn", ( done )->
 				if _testPayment?
 					paypalIPN.sendPaypalIPN( _testPayment )
-					pymts.once "completed:#{_testPayment.id}", ( _payment )=>
-						console.log "COMPLETED STATE: ", _payment.valueOf()
-						_testPayment.id.should.equal( _payment.id )
-						done()
+					pymts.once "payment:#{_testPayment.id}", ( type, _payment )=>
+						if type is "completed"
+							console.log "COMPLETED STATE: ", _payment.valueOf()
+							_testPayment.id.should.equal( _payment.id )
+							done()
 						return
 				else
 					console.log "PAYMENT CANCELD!"
@@ -103,10 +108,11 @@ describe "=== MAIN TESTS === ", ->
 			it "wait for IPN message", ( done )->
 				@timeout( 1000 * 60 * 5 ) # 5 minute timeout
 				if _testPayment?
-					pymts.once "completed:#{_testPayment.id}", ( _payment )=>
-						console.log "COMPLETED STATE: ", _payment.valueOf()
-						_testPayment.id.should.equal( _payment.id )
-						done()
+					pymts.once "payment:#{_testPayment.id}", ( type, _payment )=>
+						if type is "completed"
+							console.log "COMPLETED STATE: ", _payment.valueOf()
+							_testPayment.id.should.equal( _payment.id )
+							done()
 						return
 				else
 					console.log "PAYMENT CANCELD!"
