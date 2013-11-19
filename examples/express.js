@@ -1,12 +1,12 @@
 /*
 
 To test this example run `node examples/express.js` and then call
-http://localhost:8888/pay/paypalclassic?amount=0.01&desc=Cup%20of%20coffee&userid=123
+http://localhost:8888/pay/paypal?amount=0.01&desc=Cup%20of%20coffee&userid=123
 */
 
 
 (function() {
-  var Payments, app, express, fs, path, pymts, _configTest;
+  var Payments, app, express, fs, path, pymts, _configTest, _port;
 
   fs = require("fs");
 
@@ -16,7 +16,9 @@ http://localhost:8888/pay/paypalclassic?amount=0.01&desc=Cup%20of%20coffee&useri
 
   app = express();
 
-  app.use(express.bodyParser());
+  app.use(express.urlencoded());
+
+  app.use(express.json());
 
   app.use(express.logger("dev"));
 
@@ -68,6 +70,10 @@ http://localhost:8888/pay/paypalclassic?amount=0.01&desc=Cup%20of%20coffee&useri
     });
   });
 
-  app.listen(8888);
+  _port = 8888;
+
+  console.log("listen to " + _port);
+
+  app.listen(_port);
 
 }).call(this);

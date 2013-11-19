@@ -1,8 +1,7 @@
 config = require( "../../lib/config" )
-request = require( "request" )
 _ = require( "lodash" )
 
-module.exports = class PayPalRest extends require( "../_base/main" )	
+module.exports = class PayPal extends require( "../_base/main" )	
 	payment: require( "./payment" )
 
 	initialize: =>
@@ -10,5 +9,5 @@ module.exports = class PayPalRest extends require( "../_base/main" )
 		return
 
 	initIPN: =>
-		require( "../paypal/ipn" ).init( @main )
+		require( "./ipn" ).init( @main )
 		return

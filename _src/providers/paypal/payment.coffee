@@ -3,13 +3,12 @@ config = require( "../../lib/config" )
 request = require( "request" )
 _ = require( "lodash" )
 
-module.exports = class PaypalClassicPayment extends require( "../_base/payment" )
-	type: "paypalclassic"
+module.exports = class PaypalPayment extends require( "../_base/payment" )
+	type: "paypal"
 
 	initialize: =>
 		@_currencies = config.get( "defaultcurrency" )
-		@ppcConfig = config.get( "paypalclassic" )
-		@ppIpnConfig = config.get( "paypalipn" )
+		@ppcConfig = config.get( "paypal" )
 		return
 
 	setAuthentication: ( cb )=>
@@ -39,12 +38,16 @@ module.exports = class PaypalClassicPayment extends require( "../_base/payment" 
 			PAYMENTREQUEST_0_AMT: @amount
 			PAYMENTREQUEST_0_CURRENCYCODE: @currency
 			PAYMENTREQUEST_0_CUSTOM: @id
-			L_PAYMENTREQUEST_0_NUMBER0: 1
 			L_PAYMENTREQUEST_0_NAME0: @desc
-			L_PAYMENTREQUEST_0_QTY0: 1
 			L_PAYMENTREQUEST_0_AMT0: @amount
 			RETURNURL: _urls.success
 			CANCELURL: _urls.cancel
+
+		if @articleNumber?
+			data.L_PAYMENTREQUEST_0_NUMBER0 = @articleNumber
+
+		if @quantity?
+			data.L_PAYMENTREQUEST_0_QTY0 = @quantity
 
 		opt = 
 			url: @ppcConfig.endpoint

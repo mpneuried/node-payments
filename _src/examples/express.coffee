@@ -1,7 +1,7 @@
 ###
 
 To test this example run `node examples/express.js` and then call
-http://localhost:8888/pay/paypalclassic?amount=0.01&desc=Cup%20of%20coffee&userid=123
+http://localhost:8888/pay/paypal?amount=0.01&desc=Cup%20of%20coffee&userid=123
 
 ###
 
@@ -12,13 +12,15 @@ path = require( "path" )
 # initialize a standard express
 express = require( "express" )
 app = express()
-app.use(express.bodyParser())
+app.use( express.urlencoded() )
+app.use( express.json() )
 app.use( express.logger( "dev" ) )
 
 # get the local testing configuration
 _configTest = JSON.parse( fs.readFileSync( path.resolve( __dirname + "/../config_test.json" ) ) )
 
 # reuse the existing express
+
 _configTest.express = app
 
 # init node-payments
@@ -40,7 +42,7 @@ pymts.on "payment", ( type, payment )->
 	return
 
 # ROUTE to create a payment
-# e.g. http://localhost:8888/pay/paypalclassic?amount=0.01&desc=Cup%20of%20coffee&userid=123
+# e.g. http://localhost:8888/pay/paypal?amount=0.01&desc=Cup%20of%20coffee&userid=123
 app.get "/pay/:provider", ( req, res )->
 	_provider = req.params.provider 
 	_amount = req.query.amount
@@ -74,5 +76,6 @@ app.get "/pay/:provider", ( req, res )->
 		return
 
 	return
-
-app.listen( 8888 )
+_port = 8888
+console.log "listen to #{_port}"
+app.listen( _port )

@@ -1,15 +1,20 @@
 DEFAULT = 
-	providers: [ "paypalrest", "paypalclassic" ]
-	defaultcurrency: "EUR"
+	# this is the basic route the module will add it's required routes
+	baseroute: "/payment/"
+	
+	# a express app placeholder
+	express: null
+	# some defaults for a internal gernerated express server
+	serverDefaultPort: 8888
+	serverDefaultHost: "localhost"
+	serverSecure: false
+	
+	# PROVIDER SETTINGS
+	# availible providers
+	providers: [ "paypalrest", "paypal" ]
 
-	paypalrest: 
-		endpoint: "api.sandbox.paypal.com"
-		port: ""
-		client_id: "REPLACE-THIS"
-		client_secret: "REPLACE-THIS"
-		ipnTarget: "https://www.sandbox.paypal.com/cgi-bin/webscr?"
-
-	paypalclassic:
+	# paypal classic api settings
+	paypal:
 		endpoint: "https://api-3t.sandbox.paypal.com/nvp"
 		userid: "REPLACE-THIS"
 		password: "REPLACE-THIS"
@@ -18,16 +23,42 @@ DEFAULT =
 		receiver_email: "REPLACE-THIS"
 		linkTemplate: "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=<%= token %>"
 
-	baseroute: "/payment/"
-	serverConfig: 
-		port: 8888
-		listenhost: null
-		host: "localhost"
-		secure: false
+	# paypal rest api settings
+	paypalrest: 
+		endpoint: "api.sandbox.paypal.com"
+		port: ""
+		client_id: "REPLACE-THIS"
+		client_secret: "REPLACE-THIS"
+		ipnTarget: "https://www.sandbox.paypal.com/cgi-bin/webscr?"
 
-	express: null
+	clickandbuy: 
+		endpoint: "api.sandbox.paypal.com"
+
+	# EXTERNAL MESSAGING SETTINGS ( IPN / MMS / ... )
+
+	# paypal ipn settings
+	paypalipn:
+		# internal ipn route to get ipn messages from paypal
+		receiverPath: "/ipntest/paypal" # 
+		# ipn host settings
+		host: "www.paypal.com"
+		port: 80
+		secure: true
+		ppReturnPath: "/cgi-bin/webscr" # path to the ipn server to verify messages
+		# only accept for this user email. If set to `null` no check will be done
+		receiver_email: null
+
+		# this is just for testing to define the port of the simulated ipn
+		listenport: false
+
+	clickandbuymms: 
+		# internal ipn route to get mms messages from click&buy
+		receiverPath: "/ipntest/clickandbuy"
 
 
+	# use this currency if no currencie has been defined
+	defaultcurrency: "EUR"
+	# currency settings to translate them to float or number
 	currencies: 
 		"AUD": "float"	# Australian dollar 	
 		"CAD": "float"	# Canadian dollar 	
@@ -52,7 +83,7 @@ DEFAULT =
 		"USD": "float"	# United States dollar 	
 
 
-
+# The config module
 extend = require( "extend" )
 
 class Config

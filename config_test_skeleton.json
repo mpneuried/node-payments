@@ -6,6 +6,14 @@
 		"client_secret": "REPLACE-THIS",
 		"ipnTarget": "/paypal/ipn"
 	},
+	"paypal": {
+		"endpoint": "https://api-3t.paypal.com/nvp",
+		"userid": "REPLACE-THIS",
+		"password": "REPLACE-THIS",
+		"signature": "REPLACE-THIS",
+		"receiver_email": "REPLACE-THIS",
+		"linkTemplate": "https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=<%= token %>"
+	},
 	"paypalipn":{
 		"host": "localhost",
 		"port": 3001,

@@ -24,6 +24,8 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		@define( "pay_id", @_getPayID, @_setPayID )
 		@define( "payer_id", @_getPayerID, @_setPayerID )
 		@define( "verified", @_getVerified, @_setVerified )
+		@define( "articleNumber", @_getArticleNumber, @_setArticleNumber )
+		@define( "quantity", @_getQuantity, @_setQuantity )
 
 		@getter( "data", @_getData, false )
 
@@ -143,12 +145,14 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		return
 
 	getUrls: =>
-		_econfig = config.get( "serverConfig" )
+		_secure = config.get( "serverSecure" )
+		_port = @ownProvider.main.redir.port
+		_host = @ownProvider.main.redir.host or "localhost"
 		
-		_pre = if _econfig.secure then "https://" else "http://"
-		_pre += _econfig.host
-		if _econfig.port isnt 80
-			_pre += ":" + _econfig.port
+		_pre = if _secure then "https://" else "http://"
+		_pre += _host
+		if _port isnt 80
+			_pre += ":" + _port
 
 		return @ownProvider.main.getUrls( @id, _pre )
 
@@ -164,6 +168,8 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 			pay_id: @pay_id
 			payer_id: @payer_id
 			verified: @verified
+			quantity: @quantity
+			articleNumber: @articleNumber
 		)
 
 	# (G/S)ETTER for `amount`
@@ -236,6 +242,33 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 	_setVerified: ( val )=>
 		if val?
 			@set( "verified", val )
+		return
+
+	# (G/S)ETTER for `verified`
+	_getVerified: =>
+		return @get( "verified" ) or false
+
+	_setVerified: ( val )=>
+		if val?
+			@set( "verified", val )
+		return
+
+	# (G/S)ETTER for `articlenumber`
+	_getArticleNumber: =>
+		return @get( "articlenumber" )
+
+	_setArticleNumber: ( val )=>
+		if val?
+			@set( "articlenumber", val )
+		return
+
+	# (G/S)ETTER for `quantity`
+	_getQuantity: =>
+		return @get( "quantity" )
+
+	_setQuantity: ( val )=>
+		if val?
+			@set( "quantity", val )
 		return
 
 	validate: ( cb )=>

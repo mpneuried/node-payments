@@ -6,6 +6,15 @@ module.exports = class RedirServer extends require( "./basic" )
 
 		if express?.engines?
 			# reuse an existing express server
+			
+			# proxy the listen method to get the port
+			_listen = express.listen
+			express.listen = ( port, host )=>
+				@port = port
+				@port = port
+				_listen.apply( express, arguments )
+				return
+
 			@server = express
 		else
 			# create a express server
@@ -15,22 +24,23 @@ module.exports = class RedirServer extends require( "./basic" )
 		return
 
 	createExpress: =>
-		_econfig = config.get( "serverConfig" )
+		@port = config.get( "serverDefaultPort" )
+		@host = config.get( "serverDefaultHost" )
 		try
 			express = require( "express" )
 		catch _err
 			if _err.code is "MODULE_NOT_FOUND"
 				@_handleError( null, "EMISSINGEXPRESS" )
-
 			return
 
 		@server = express()
 
 		@server.set( "title", "node-payment" )
 		@server.use( express.logger( "dev" ) )
-		@server.use( express.bodyParser() )
+		@server.use( connect.urlencoded() )
+		@server.use( connect.json() )
 
-		@server.listen( _econfig.port, _econfig.listenhost )
+		@server.listen( @port )
 		return
 
 	auth: ( req, res, next )=>

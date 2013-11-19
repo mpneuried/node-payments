@@ -21,6 +21,12 @@
       this.ownProvider = ownProvider;
       this.ERRORS = __bind(this.ERRORS, this);
       this.validate = __bind(this.validate, this);
+      this._setQuantity = __bind(this._setQuantity, this);
+      this._getQuantity = __bind(this._getQuantity, this);
+      this._setArticleNumber = __bind(this._setArticleNumber, this);
+      this._getArticleNumber = __bind(this._getArticleNumber, this);
+      this._setVerified = __bind(this._setVerified, this);
+      this._getVerified = __bind(this._getVerified, this);
       this._setVerified = __bind(this._setVerified, this);
       this._getVerified = __bind(this._getVerified, this);
       this._setPayerID = __bind(this._setPayerID, this);
@@ -64,6 +70,8 @@
       this.define("pay_id", this._getPayID, this._setPayID);
       this.define("payer_id", this._getPayerID, this._setPayerID);
       this.define("verified", this._getVerified, this._setVerified);
+      this.define("articleNumber", this._getArticleNumber, this._setArticleNumber);
+      this.define("quantity", this._getQuantity, this._setQuantity);
       this.getter("data", this._getData, false);
       this.set(data);
       return;
@@ -208,12 +216,14 @@
     };
 
     BasePayment.prototype.getUrls = function() {
-      var _econfig, _pre;
-      _econfig = config.get("serverConfig");
-      _pre = _econfig.secure ? "https://" : "http://";
-      _pre += _econfig.host;
-      if (_econfig.port !== 80) {
-        _pre += ":" + _econfig.port;
+      var _host, _port, _pre, _secure;
+      _secure = config.get("serverSecure");
+      _port = this.ownProvider.main.redir.port;
+      _host = this.ownProvider.main.redir.host || "localhost";
+      _pre = _secure ? "https://" : "http://";
+      _pre += _host;
+      if (_port !== 80) {
+        _pre += ":" + _port;
       }
       return this.ownProvider.main.getUrls(this.id, _pre);
     };
@@ -228,7 +238,9 @@
         state: this.state,
         pay_id: this.pay_id,
         payer_id: this.payer_id,
-        verified: this.verified
+        verified: this.verified,
+        quantity: this.quantity,
+        articleNumber: this.articleNumber
       });
     };
 
@@ -309,6 +321,36 @@
     BasePayment.prototype._setVerified = function(val) {
       if (val != null) {
         this.set("verified", val);
+      }
+    };
+
+    BasePayment.prototype._getVerified = function() {
+      return this.get("verified") || false;
+    };
+
+    BasePayment.prototype._setVerified = function(val) {
+      if (val != null) {
+        this.set("verified", val);
+      }
+    };
+
+    BasePayment.prototype._getArticleNumber = function() {
+      return this.get("articlenumber");
+    };
+
+    BasePayment.prototype._setArticleNumber = function(val) {
+      if (val != null) {
+        this.set("articlenumber", val);
+      }
+    };
+
+    BasePayment.prototype._getQuantity = function() {
+      return this.get("quantity");
+    };
+
+    BasePayment.prototype._setQuantity = function(val) {
+      if (val != null) {
+        this.set("quantity", val);
       }
     };
 

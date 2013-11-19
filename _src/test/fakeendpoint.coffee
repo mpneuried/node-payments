@@ -24,17 +24,19 @@ class PaypalIPN extends require( "../lib/basic" )
 		return @
 
 	routes: =>
-		@server.post @config.path, @ppIpnReturn
+		@server.post @config.receiverPath, @ppIpnReturn
 		return @
 
 	sendPaypalIPN: ( payment, status = "Completed" )=>
 
-		_PmntConfig = config.get( "serverConfig" )
+		_secure = config.get( "serverSecure" )
+		_port =  config.get( "serverDefaultPort" )
+		_host = config.get( "serverDefaultHost" )
 		
-		_host = if _PmntConfig.secure then "https://" else "http://"
-		_host += _PmntConfig.host
-		if _PmntConfig.port isnt 80
-			_host += ":" + _PmntConfig.port
+		_pre = if _secure then "https://" else "http://"
+		_pre += _host
+		if _port isnt 80
+			_pre += ":" + _port
 
 		_body =
 			# receiver

@@ -47,7 +47,7 @@ describe "=== MAIN TESTS === ", ->
 
 		it "create payment", ( done )->
 			@timeout( 1000 * 60 * 5 ) # 5 minute timeout
-			pymts.provider "paypalclassic", ( err, paypal )=>
+			pymts.provider "paypal", ( err, paypal )=>
 				should.not.exist( err )
 
 				_amount = 0.01

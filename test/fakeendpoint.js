@@ -41,21 +41,23 @@
     };
 
     PaypalIPN.prototype.routes = function() {
-      this.server.post(this.config.path, this.ppIpnReturn);
+      this.server.post(this.config.receiverPath, this.ppIpnReturn);
       return this;
     };
 
     PaypalIPN.prototype.sendPaypalIPN = function(payment, status) {
-      var opt, _PmntConfig, _body, _host,
+      var opt, _body, _host, _port, _pre, _secure,
         _this = this;
       if (status == null) {
         status = "Completed";
       }
-      _PmntConfig = config.get("serverConfig");
-      _host = _PmntConfig.secure ? "https://" : "http://";
-      _host += _PmntConfig.host;
-      if (_PmntConfig.port !== 80) {
-        _host += ":" + _PmntConfig.port;
+      _secure = config.get("serverSecure");
+      _port = config.get("serverDefaultPort");
+      _host = config.get("serverDefaultHost");
+      _pre = _secure ? "https://" : "http://";
+      _pre += _host;
+      if (_port !== 80) {
+        _pre += ":" + _port;
       }
       _body = {
         receiver_email: this.config.receiver_email,

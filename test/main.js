@@ -56,7 +56,7 @@
       it("create payment", function(done) {
         var _this = this;
         this.timeout(1000 * 60 * 5);
-        pymts.provider("paypalclassic", function(err, paypal) {
+        pymts.provider("paypal", function(err, paypal) {
           var payment, _amount, _id;
           should.not.exist(err);
           _amount = 0.01;
