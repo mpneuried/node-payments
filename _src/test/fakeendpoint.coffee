@@ -17,6 +17,8 @@ class PaypalIPN extends require( "../lib/basic" )
 	init: =>
 		@server.set( "title", "fake-IPN for node-payment" )
 		@server.use( express.logger( "dev" ) )
+		@server.use( express.urlencoded() )
+		@server.use( express.json() )
 		return @
 
 	start: =>
@@ -33,10 +35,10 @@ class PaypalIPN extends require( "../lib/basic" )
 		_port =  config.get( "serverDefaultPort" )
 		_host = config.get( "serverDefaultHost" )
 		
-		_pre = if _secure then "https://" else "http://"
-		_pre += _host
+		_url = if _secure then "https://" else "http://"
+		_url += _host
 		if _port isnt 80
-			_pre += ":" + _port
+			_url += ":" + _port
 
 		_body =
 			# receiver
@@ -89,10 +91,9 @@ class PaypalIPN extends require( "../lib/basic" )
 			verify_sign: "AtkOfCXbDm2hu0ZELryHFjY-Vb7PAUvS6nMXgysbElEn9v-1XcmSoGtf"
 
 		@lastQuery = JSON.stringify( _body )
-
 		opt = 
 			method: "POST"
-			url: _host + config.get( "paypalipn" ).path
+			url: _url + config.get( "paypalipn" ).receiverPath
 			form: _body
 
 		request opt, ( err, resp, body )=>

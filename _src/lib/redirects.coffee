@@ -5,6 +5,7 @@ module.exports = class RedirServer extends require( "./basic" )
 		super()
 
 		if express?.engines?
+
 			# reuse an existing express server
 			
 			# proxy the listen method to get the port
@@ -14,13 +15,12 @@ module.exports = class RedirServer extends require( "./basic" )
 				@port = port
 				_listen.apply( express, arguments )
 				return
-
 			@server = express
+			@createRoutes()
 		else
 			# create a express server
 			@createExpress()
-
-		@createRoutes()
+	
 		return
 
 	createExpress: =>
@@ -37,8 +37,10 @@ module.exports = class RedirServer extends require( "./basic" )
 
 		@server.set( "title", "node-payment" )
 		@server.use( express.logger( "dev" ) )
-		@server.use( connect.urlencoded() )
-		@server.use( connect.json() )
+		@server.use( express.urlencoded() )
+		@server.use( express.json() )
+
+		@createRoutes()
 
 		@server.listen( @port )
 		return

@@ -6,7 +6,6 @@ class PayPalIpn extends require( "../_base/main" )
 	initialize: =>
 		@initialized = false
 		@_currencies = config.get( "defaultcurrency" )
-		@_ipnCnf = config.get( "paypalipn" )
 		#@initIPN()
 		return
 
@@ -14,7 +13,7 @@ class PayPalIpn extends require( "../_base/main" )
 		if not @initialized
 			@initialized = true
 			server = @main.getExpress()
-			server.post @_ipnCnf.receiverPath, @answer200, @verifyPayPalIpn, @ipnInput
+			server.post @config.receiverPath, @answer200, @verifyPayPalIpn, @ipnInput
 		return
 
 	answer200: ( req, res, next )=>
@@ -25,13 +24,21 @@ class PayPalIpn extends require( "../_base/main" )
 
 	verifyPayPalIpn: ( req, res, next )=>
 		_formdata = _.extend( {}, req.body, cmd: "_notify-validate" )
+		_url = ( if @config.secure then "https://" else "http://" ) + @config.host + ( if not @config.port? or @config.port isnt 80 then ":" + @config.port else "" )
+		
+		if not @config.listenport
+			# use live ipn path
+			_url += @config.ppReturnPath
+		else
+			# use internal ipn server for testing
+			_url += @config.receiverPath
 		opt = 
 			method: "POST"
-			url: ( if @_ipnCnf.secure then "https://" else "http://" ) + @_ipnCnf.host + ( if not @_ipnCnf.port? or @_ipnCnf.port isnt 80 then ":" + @_ipnCnf.port else "" ) + @_ipnCnf.ppReturnPath
+			url: _url
 			form: _formdata
 
 		request opt, ( err, resp, body )=>
-			@info "VERIFY IPN MESSAGE", err, body
+			@info "VERIFY IPN MESSAGE", opt, err, body
 			if err
 				@error( err )
 				return
@@ -53,8 +60,8 @@ class PayPalIpn extends require( "../_base/main" )
 		else
 			_amount = parseFloat( req.body.mc_gross, 10 )
 
-		if @_ipnCnf.receiver_email? and _receiver isnt @_ipnCnf.receiver_email
-			@_handleError( null, "EPPIPNINVALIDRECEIVER", { got: _receiver, needed: @_ipnCnf.receiver_email } )
+		if @config.receiver_email? and _receiver isnt @config.receiver_email
+			@_handleError( null, "EPPIPNINVALIDRECEIVER", { got: _receiver, needed: @config.receiver_email } )
 			return
 
 		@main.getPayment _pid, ( err, payment )=>

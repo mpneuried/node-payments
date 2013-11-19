@@ -1,22 +1,24 @@
 {
-	"paypalrest": {
-		"endpoint": "api.sandbox.paypal.com",
-		"port": "",
-		"client_id": "REPLACE-THIS",
-		"client_secret": "REPLACE-THIS",
-		"ipnTarget": "/paypal/ipn"
-	},
+	"serverDefaultPort": 8889,
 	"paypal": {
-		"endpoint": "https://api-3t.paypal.com/nvp",
 		"userid": "REPLACE-THIS",
 		"password": "REPLACE-THIS",
 		"signature": "REPLACE-THIS",
 		"receiver_email": "REPLACE-THIS",
-		"linkTemplate": "https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=<%= token %>"
+		"localcode": "DE"
+	},
+	"paypalrest": {
+		"port": "",
+		"client_id": "REPLACE-THIS",
+		"client_secret": "REPLACE-THIS"
 	},
 	"paypalipn":{
-		"host": "localhost",
-		"port": 3001,
-		"path": "/ipn"
+		"host": "www.webmart.de",
+		"port": 80,
+		"listenport": 8888,
+		"secure": true,
+		"receiverPath": "/ipntest/paypal",
+		"ppReturnPath": "/cgi-bin/webscr",
+		"receiver_email": "REPLACE-THIS"
 	}
 }

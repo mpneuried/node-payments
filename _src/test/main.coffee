@@ -95,8 +95,8 @@ describe "=== MAIN TESTS === ", ->
 				if _testPayment?
 					paypalIPN.sendPaypalIPN( _testPayment )
 					pymts.once "payment:#{_testPayment.id}", ( type, _payment )=>
-						if type is "completed"
-							console.log "COMPLETED STATE: ", _payment.valueOf()
+						if type is "verfied"
+							console.log "VERIFIED STATE: ", _payment.valueOf()
 							_testPayment.id.should.equal( _payment.id )
 							done()
 						return
@@ -109,8 +109,8 @@ describe "=== MAIN TESTS === ", ->
 				@timeout( 1000 * 60 * 5 ) # 5 minute timeout
 				if _testPayment?
 					pymts.once "payment:#{_testPayment.id}", ( type, _payment )=>
-						if type is "completed"
-							console.log "COMPLETED STATE: ", _payment.valueOf()
+						if type is "verfied"
+							console.log "VERIFIED STATE: ", _payment.valueOf()
 							_testPayment.id.should.equal( _payment.id )
 							done()
 						return
@@ -119,8 +119,5 @@ describe "=== MAIN TESTS === ", ->
 					done()
 				return
 
-		it "keep server open", ( done )->
-			@timeout( 0 )
-			return
 		return
 	return

@@ -32,6 +32,8 @@
     PaypalIPN.prototype.init = function() {
       this.server.set("title", "fake-IPN for node-payment");
       this.server.use(express.logger("dev"));
+      this.server.use(express.urlencoded());
+      this.server.use(express.json());
       return this;
     };
 
@@ -46,7 +48,7 @@
     };
 
     PaypalIPN.prototype.sendPaypalIPN = function(payment, status) {
-      var opt, _body, _host, _port, _pre, _secure,
+      var opt, _body, _host, _port, _secure, _url,
         _this = this;
       if (status == null) {
         status = "Completed";
@@ -54,10 +56,10 @@
       _secure = config.get("serverSecure");
       _port = config.get("serverDefaultPort");
       _host = config.get("serverDefaultHost");
-      _pre = _secure ? "https://" : "http://";
-      _pre += _host;
+      _url = _secure ? "https://" : "http://";
+      _url += _host;
       if (_port !== 80) {
-        _pre += ":" + _port;
+        _url += ":" + _port;
       }
       _body = {
         receiver_email: this.config.receiver_email,
@@ -103,7 +105,7 @@
       this.lastQuery = JSON.stringify(_body);
       opt = {
         method: "POST",
-        url: _host + config.get("paypalipn").path,
+        url: _url + config.get("paypalipn").receiverPath,
         form: _body
       };
       request(opt, function(err, resp, body) {

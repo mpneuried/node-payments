@@ -27,7 +27,6 @@
     PayPalIpn.prototype.initialize = function() {
       this.initialized = false;
       this._currencies = config.get("defaultcurrency");
-      this._ipnCnf = config.get("paypalipn");
     };
 
     PayPalIpn.prototype.init = function(main) {
@@ -36,7 +35,7 @@
       if (!this.initialized) {
         this.initialized = true;
         server = this.main.getExpress();
-        server.post(this._ipnCnf.receiverPath, this.answer200, this.verifyPayPalIpn, this.ipnInput);
+        server.post(this.config.receiverPath, this.answer200, this.verifyPayPalIpn, this.ipnInput);
       }
     };
 
@@ -47,18 +46,24 @@
     };
 
     PayPalIpn.prototype.verifyPayPalIpn = function(req, res, next) {
-      var opt, _formdata,
+      var opt, _formdata, _url,
         _this = this;
       _formdata = _.extend({}, req.body, {
         cmd: "_notify-validate"
       });
+      _url = (this.config.secure ? "https://" : "http://") + this.config.host + ((this.config.port == null) || this.config.port !== 80 ? ":" + this.config.port : "");
+      if (!this.config.listenport) {
+        _url += this.config.ppReturnPath;
+      } else {
+        _url += this.config.receiverPath;
+      }
       opt = {
         method: "POST",
-        url: (this._ipnCnf.secure ? "https://" : "http://") + this._ipnCnf.host + ((this._ipnCnf.port == null) || this._ipnCnf.port !== 80 ? ":" + this._ipnCnf.port : "") + this._ipnCnf.ppReturnPath,
+        url: _url,
         form: _formdata
       };
       request(opt, function(err, resp, body) {
-        _this.info("VERIFY IPN MESSAGE", err, body);
+        _this.info("VERIFY IPN MESSAGE", opt, err, body);
         if (err) {
           _this.error(err);
           return;
@@ -84,10 +89,10 @@
       } else {
         _amount = parseFloat(req.body.mc_gross, 10);
       }
-      if ((this._ipnCnf.receiver_email != null) && _receiver !== this._ipnCnf.receiver_email) {
+      if ((this.config.receiver_email != null) && _receiver !== this.config.receiver_email) {
         this._handleError(null, "EPPIPNINVALIDRECEIVER", {
           got: _receiver,
-          needed: this._ipnCnf.receiver_email
+          needed: this.config.receiver_email
         });
         return;
       }

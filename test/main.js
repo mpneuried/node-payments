@@ -96,8 +96,8 @@
           if (_testPayment != null) {
             paypalIPN.sendPaypalIPN(_testPayment);
             pymts.once("payment:" + _testPayment.id, function(type, _payment) {
-              if (type === "completed") {
-                console.log("COMPLETED STATE: ", _payment.valueOf());
+              if (type === "verfied") {
+                console.log("VERIFIED STATE: ", _payment.valueOf());
                 _testPayment.id.should.equal(_payment.id);
                 done();
               }
@@ -113,8 +113,8 @@
           this.timeout(1000 * 60 * 5);
           if (_testPayment != null) {
             pymts.once("payment:" + _testPayment.id, function(type, _payment) {
-              if (type === "completed") {
-                console.log("COMPLETED STATE: ", _payment.valueOf());
+              if (type === "verfied") {
+                console.log("VERIFIED STATE: ", _payment.valueOf());
                 _testPayment.id.should.equal(_payment.id);
                 done();
               }
@@ -125,9 +125,6 @@
           }
         });
       }
-      it("keep server open", function(done) {
-        this.timeout(0);
-      });
     });
   });
 
