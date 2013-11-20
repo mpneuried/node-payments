@@ -64,7 +64,7 @@ class PayPalIpn extends require( "../_base/main" )
 
 		@main.getPayment _pid, ( err, payment )=>
 			if err
-				if err?.name is "EPAYMENTNOTFOUND"
+				if not config.get( "productionmode" ) and err?.name is "EPAYMENTNOTFOUND"
 					@warning( "Payment not found in system so return a 200 to IPN" )
 					res.send( "NOTFOUND", 200 )
 					return

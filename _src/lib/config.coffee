@@ -1,7 +1,11 @@
 DEFAULT = 
 	# this is the basic route the module will add it's required routes
 	baseroute: "/payment/"
-	
+
+	# In production mode a external message ( ipn/mms/... ) will only answerd with HTTP:200 if everything succeeded.
+	# In an non productive mode it will also answer if the payment has not been foun within the payment store.
+	productionmode: true
+
 	# a express app placeholder
 	express: null
 	# some defaults for a internal gernerated express server
