@@ -95,7 +95,7 @@
       }
       this.main.getPayment(_pid, function(err, payment) {
         if (err) {
-          if ((err != null ? err.name : void 0) === "EPAYMENTNOTFOUND") {
+          if (!config.get("productionmode") && (err != null ? err.name : void 0) === "EPAYMENTNOTFOUND") {
             _this.warning("Payment not found in system so return a 200 to IPN");
             res.send("NOTFOUND", 200);
             return;
