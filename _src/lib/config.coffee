@@ -11,7 +11,7 @@ DEFAULT =
 	
 	# PROVIDER SETTINGS
 	# availible providers
-	providers: [ "paypalrest", "paypal" ]
+	providers: [ "paypal", "paypalrest", "clickandbuy" ]
 
 	# paypal classic api settings
 	paypal:
@@ -21,6 +21,7 @@ DEFAULT =
 		signature: "REPLACE-THIS"
 		application_id: "APP-80W284485P519543T" # REPLACE-THIS - default value is the global sandbox id.
 		receiver_email: "REPLACE-THIS"
+		localcode: "DE"
 		linkTemplate: "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=<%= token %>"
 
 	# paypal rest api settings
@@ -32,7 +33,12 @@ DEFAULT =
 		ipnTarget: "https://www.sandbox.paypal.com/cgi-bin/webscr?"
 
 	clickandbuy: 
-		endpoint: "api.sandbox.paypal.com"
+		endpoint: "https://api.clickandbuy.com/webservices/soap/pay_1_1_0/"
+		merchantid: "REPLACE-THIS",
+		projectid: "REPLACE-THIS",
+		cryptokey: "REPLACE-THIS"
+		localcode: "DE"
+
 
 	# EXTERNAL MESSAGING SETTINGS ( IPN / MMS / ... )
 
@@ -52,6 +58,7 @@ DEFAULT =
 		listenport: false
 
 	clickandbuymms: 
+
 		# internal ipn route to get mms messages from click&buy
 		receiverPath: "/ipntest/clickandbuy"
 

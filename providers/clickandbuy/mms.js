@@ -1,5 +1,5 @@
 (function() {
-  var PayPalIpn, config, request, _, _ref,
+  var ClickAndBuyMMS, config, request, _, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -10,28 +10,29 @@
 
   _ = require("lodash");
 
-  PayPalIpn = (function(_super) {
-    __extends(PayPalIpn, _super);
+  ClickAndBuyMMS = (function(_super) {
+    __extends(ClickAndBuyMMS, _super);
 
-    function PayPalIpn() {
+    function ClickAndBuyMMS() {
       this.ERRORS = __bind(this.ERRORS, this);
       this.input = __bind(this.input, this);
       this.verify = __bind(this.verify, this);
       this.answer200 = __bind(this.answer200, this);
       this.init = __bind(this.init, this);
       this.initialize = __bind(this.initialize, this);
-      _ref = PayPalIpn.__super__.constructor.apply(this, arguments);
+      _ref = ClickAndBuyMMS.__super__.constructor.apply(this, arguments);
       return _ref;
     }
 
-    PayPalIpn.prototype.initialize = function() {
+    ClickAndBuyMMS.prototype.initialize = function() {
       this.initialized = false;
       this._currencies = config.get("defaultcurrency");
     };
 
-    PayPalIpn.prototype.init = function(main) {
+    ClickAndBuyMMS.prototype.init = function(main) {
       var server;
       this.main = main;
+      console.log("INIT");
       if (!this.initialized) {
         this.initialized = true;
         server = this.main.getExpress();
@@ -39,13 +40,13 @@
       }
     };
 
-    PayPalIpn.prototype.answer200 = function(req, res, next) {
+    ClickAndBuyMMS.prototype.answer200 = function(req, res, next) {
       this.debug("IPN Input", req.body);
       res.send("OK");
       next();
     };
 
-    PayPalIpn.prototype.verify = function(req, res, next) {
+    ClickAndBuyMMS.prototype.verify = function(req, res, next) {
       var opt, _formdata, _url,
         _this = this;
       _formdata = _.extend({}, req.body, {
@@ -76,7 +77,7 @@
       });
     };
 
-    PayPalIpn.prototype.input = function(req, res) {
+    ClickAndBuyMMS.prototype.input = function(req, res) {
       var _amount, _atype, _currency, _pid, _receiver, _status,
         _this = this;
       _pid = req.body.custom;
@@ -90,7 +91,7 @@
         _amount = parseFloat(req.body.mc_gross, 10);
       }
       if ((this.config.receiver_email != null) && _receiver !== this.config.receiver_email) {
-        this._handleError(null, "EPPIPNINVALIDRECEIVER", {
+        this._handleError(null, "ECBMMSINVALIDRECEIVER", {
           got: _receiver,
           needed: this.config.receiver_email
         });
@@ -103,14 +104,14 @@
         }
         _this.debug("IPN returned", _pid, payment.valueOf());
         if (_currency !== payment.currency) {
-          _this._handleError(null, "EPPIPNINVALIDCURRENCY", {
+          _this._handleError(null, "ECBMMSINVALIDCURRENCY", {
             got: _currency,
             needed: payment.currency
           });
           return;
         }
         if (Math.abs(_amount) !== payment.amount) {
-          _this._handleError(null, "EPPIPNINVALIDAMOUNT", {
+          _this._handleError(null, "ECBMMSINVALIDAMOUNT", {
             got: _amount,
             needed: payment.amount
           });
@@ -131,18 +132,18 @@
       });
     };
 
-    PayPalIpn.prototype.ERRORS = function() {
-      return this.extend(PayPalIpn.__super__.ERRORS.apply(this, arguments), {
-        "EPPIPNINVALIDRECEIVER": "The paypal IPN sends a completed message for a wrong receiver. Has to be `<%= needed %>` bot got `<%= got %>`.",
-        "EPPIPNINVALIDAMOUNT": "The paypal IPN sends a currency unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`.",
-        "EPPIPNINVALIDAMOUNT": "The paypal IPN sends a amount unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`."
+    ClickAndBuyMMS.prototype.ERRORS = function() {
+      return this.extend(ClickAndBuyMMS.__super__.ERRORS.apply(this, arguments), {
+        "ECBMMSINVALIDRECEIVER": "The paypal IPN sends a completed message for a wrong receiver. Has to be `<%= needed %>` bot got `<%= got %>`.",
+        "ECBMMSINVALIDAMOUNT": "The paypal IPN sends a currency unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`.",
+        "ECBMMSINVALIDAMOUNT": "The paypal IPN sends a amount unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`."
       });
     };
 
-    return PayPalIpn;
+    return ClickAndBuyMMS;
 
   })(require("../_base/main"));
 
-  module.exports = new PayPalIpn();
+  module.exports = new ClickAndBuyMMS();
 
 }).call(this);

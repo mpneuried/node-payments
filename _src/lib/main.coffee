@@ -28,6 +28,7 @@ module.exports = class Payments extends require( "./basic" )
 			try
 				@addProvider( type, require( "../providers/#{type}/." ) )
 			catch _err
+				console.log _err.stack
 				if _err?.customError?
 					throw _err
 					return

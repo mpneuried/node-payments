@@ -1,5 +1,5 @@
 (function() {
-  exports.version = '0.0.2';
+  exports.version = '0.0.4';
 
   exports.config = require('./lib/config');
 

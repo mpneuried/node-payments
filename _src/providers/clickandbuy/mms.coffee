@@ -2,7 +2,7 @@ config = require( "../../lib/config" )
 request = require( "request" )
 _ = require( "lodash" )
 
-class PayPalIpn extends require( "../_base/main" )	
+class ClickAndBuyMMS extends require( "../_base/main" )	
 	initialize: =>
 		@initialized = false
 		@_currencies = config.get( "defaultcurrency" )
@@ -10,6 +10,7 @@ class PayPalIpn extends require( "../_base/main" )
 		return
 
 	init: ( @main )=>
+		console.log "INIT"
 		if not @initialized
 			@initialized = true
 			server = @main.getExpress()
@@ -61,7 +62,7 @@ class PayPalIpn extends require( "../_base/main" )
 			_amount = parseFloat( req.body.mc_gross, 10 )
 
 		if @config.receiver_email? and _receiver isnt @config.receiver_email
-			@_handleError( null, "EPPIPNINVALIDRECEIVER", { got: _receiver, needed: @config.receiver_email } )
+			@_handleError( null, "ECBMMSINVALIDRECEIVER", { got: _receiver, needed: @config.receiver_email } )
 			return
 
 		@main.getPayment _pid, ( err, payment )=>
@@ -72,11 +73,11 @@ class PayPalIpn extends require( "../_base/main" )
 			@debug "IPN returned", _pid, payment.valueOf()
 
 			if _currency isnt payment.currency
-				@_handleError( null, "EPPIPNINVALIDCURRENCY", { got: _currency, needed: payment.currency } )
+				@_handleError( null, "ECBMMSINVALIDCURRENCY", { got: _currency, needed: payment.currency } )
 				return
 
 			if Math.abs( _amount ) isnt payment.amount
-				@_handleError( null, "EPPIPNINVALIDAMOUNT", { got: _amount, needed: payment.amount } )
+				@_handleError( null, "ECBMMSINVALIDAMOUNT", { got: _amount, needed: payment.amount } )
 				return
 
 			payment.set( "state", _status )
@@ -94,8 +95,8 @@ class PayPalIpn extends require( "../_base/main" )
 
 	ERRORS: =>
 		@extend super, 
-			"EPPIPNINVALIDRECEIVER": "The paypal IPN sends a completed message for a wrong receiver. Has to be `<%= needed %>` bot got `<%= got %>`."
-			"EPPIPNINVALIDAMOUNT": "The paypal IPN sends a currency unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`."			
-			"EPPIPNINVALIDAMOUNT": "The paypal IPN sends a amount unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`."			
+			"ECBMMSINVALIDRECEIVER": "The paypal IPN sends a completed message for a wrong receiver. Has to be `<%= needed %>` bot got `<%= got %>`."
+			"ECBMMSINVALIDAMOUNT": "The paypal IPN sends a currency unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`."			
+			"ECBMMSINVALIDAMOUNT": "The paypal IPN sends a amount unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`."			
 
-module.exports = new PayPalIpn()
+module.exports = new ClickAndBuyMMS()
