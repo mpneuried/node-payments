@@ -32,7 +32,6 @@
     ClickAndBuyMMS.prototype.init = function(main) {
       var server;
       this.main = main;
-      console.log("INIT");
       if (!this.initialized) {
         this.initialized = true;
         server = this.main.getExpress();

@@ -37,6 +37,10 @@ pymts.on "cancel", ( res, payment )->
 	res.send( "What a pity!" )
 	return
 
+pymts.on "verfied", ( payment )->
+	console.log "PAYMENT VERIFIED\n", payment.valueOf()
+	return
+
 pymts.on "payment", ( type, payment )->
 	console.log "PAYMENT ACTION: #{type}\n", payment.valueOf()
 	return

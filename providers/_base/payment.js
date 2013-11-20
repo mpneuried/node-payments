@@ -21,6 +21,8 @@
       this.ownProvider = ownProvider;
       this.ERRORS = __bind(this.ERRORS, this);
       this.validate = __bind(this.validate, this);
+      this._setTransaction = __bind(this._setTransaction, this);
+      this._getTransaction = __bind(this._getTransaction, this);
       this._setQuantity = __bind(this._setQuantity, this);
       this._getQuantity = __bind(this._getQuantity, this);
       this._setArticleNumber = __bind(this._setArticleNumber, this);
@@ -72,6 +74,7 @@
       this.define("verified", this._getVerified, this._setVerified);
       this.define("articleNumber", this._getArticleNumber, this._setArticleNumber);
       this.define("quantity", this._getQuantity, this._setQuantity);
+      this.define("transaction", this._getTransaction, this._setTransaction);
       this.getter("data", this._getData, false);
       this.set(data);
       return;
@@ -240,7 +243,8 @@
         payer_id: this.payer_id,
         verified: this.verified,
         quantity: this.quantity,
-        articleNumber: this.articleNumber
+        articleNumber: this.articleNumber,
+        transaction: this.transaction
       });
     };
 
@@ -351,6 +355,16 @@
     BasePayment.prototype._setQuantity = function(val) {
       if (val != null) {
         this.set("quantity", val);
+      }
+    };
+
+    BasePayment.prototype._getTransaction = function() {
+      return this.get("transaction");
+    };
+
+    BasePayment.prototype._setTransaction = function(val) {
+      if (val != null) {
+        this.set("transaction", val);
       }
     };
 

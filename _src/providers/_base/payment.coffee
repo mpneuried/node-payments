@@ -26,6 +26,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		@define( "verified", @_getVerified, @_setVerified )
 		@define( "articleNumber", @_getArticleNumber, @_setArticleNumber )
 		@define( "quantity", @_getQuantity, @_setQuantity )
+		@define( "transaction", @_getTransaction, @_setTransaction )
 
 		@getter( "data", @_getData, false )
 
@@ -170,6 +171,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 			verified: @verified
 			quantity: @quantity
 			articleNumber: @articleNumber
+			transaction: @transaction
 		)
 
 	# (G/S)ETTER for `amount`
@@ -269,6 +271,15 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 	_setQuantity: ( val )=>
 		if val?
 			@set( "quantity", val )
+		return
+
+	# (G/S)ETTER for `transaction`
+	_getTransaction: =>
+		return @get( "transaction" )
+
+	_setTransaction: ( val )=>
+		if val?
+			@set( "transaction", val )
 		return
 
 	validate: ( cb )=>

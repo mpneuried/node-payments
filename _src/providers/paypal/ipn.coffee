@@ -13,13 +13,7 @@ class PayPalIpn extends require( "../_base/main" )
 		if not @initialized
 			@initialized = true
 			server = @main.getExpress()
-			server.post @config.receiverPath, @answer200, @verify, @input
-		return
-
-	answer200: ( req, res, next )=>
-		@debug "IPN Input", req.body
-		res.send( "OK" )
-		next()
+			server.post @config.receiverPath, @verify, @input
 		return
 
 	verify: ( req, res, next )=>
@@ -41,19 +35,22 @@ class PayPalIpn extends require( "../_base/main" )
 			@info "VERIFY IPN MESSAGE", opt, err, body
 			if err
 				@error( err )
+				res.send( "FAILED", 500 )
 				return
 			if body is "VERIFIED"
 				next()
 			else
 				@error( err )
+				res.send( "FAILED", 500 )
 			return
 		return
 
-	input: ( req, res )=>
+	input: ( req, res, next )=>
 		_pid = req.body.custom
 		_status = req.body.payment_status.toUpperCase()
 		_receiver = req.body.receiver_email
 		_currency = req.body.mc_currency
+		_transaction = req.body.txn_id
 		_atype = @_currencies[ _currency ]
 		if _atype is "int"
 			_amount = parseInt( req.body.mc_gross, 10 )
@@ -62,32 +59,43 @@ class PayPalIpn extends require( "../_base/main" )
 
 		if @config.receiver_email? and _receiver isnt @config.receiver_email
 			@_handleError( null, "EPPIPNINVALIDRECEIVER", { got: _receiver, needed: @config.receiver_email } )
+			res.send( "FAILED", 500 )
 			return
 
 		@main.getPayment _pid, ( err, payment )=>
 			if err
+				if err?.name is "EPAYMENTNOTFOUND"
+					@warning( "Payment not found in system so return a 200 to IPN" )
+					res.send( "NOTFOUND", 200 )
+					return
 				@error( err )
+				res.send( "FAILED", 500 )
 				return
 			
 			@debug "IPN returned", _pid, payment.valueOf()
 
 			if _currency isnt payment.currency
 				@_handleError( null, "EPPIPNINVALIDCURRENCY", { got: _currency, needed: payment.currency } )
+				res.send( "FAILED", 500 )
 				return
 
 			if Math.abs( _amount ) isnt payment.amount
 				@_handleError( null, "EPPIPNINVALIDAMOUNT", { got: _amount, needed: payment.amount } )
+				res.send( "FAILED", 500 )
 				return
 
 			payment.set( "state", _status )
+			payment.set( "transaction", _transaction )
 			payment.set( "verified", true )
 			payment.persist ( err )=>
-				if _status is "COMPLETED"
-					if err
-						@error( err )
-						return
-					@main.emit( "payment", "verfied", payment )
-					@main.emit( "payment:#{payment.id}", "verfied", payment )
+				if err
+					@error( err )
+					res.send( "FAILED", 500 )
+					return
+				@main.emit( "payment", "verfied", payment )
+				@main.emit( "payment:#{payment.id}", "verfied", payment )
+				@main.emit( "verfied", payment )
+				res.send( "OK" )
 				return
 			return
 		return

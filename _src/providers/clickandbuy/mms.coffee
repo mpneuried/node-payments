@@ -10,7 +10,6 @@ class ClickAndBuyMMS extends require( "../_base/main" )
 		return
 
 	init: ( @main )=>
-		console.log "INIT"
 		if not @initialized
 			@initialized = true
 			server = @main.getExpress()

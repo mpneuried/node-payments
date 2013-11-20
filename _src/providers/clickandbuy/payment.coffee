@@ -1,5 +1,6 @@
 querystring = require( "querystring" )
 crypto = require( "crypto" )
+moment = require( "moment" )
 
 config = require( "../../lib/config" )
 request = require( "request" )
@@ -14,7 +15,7 @@ module.exports = class ClickAndBuyPayment extends require( "../_base/payment" )
 		return
 
 	createToken: ( pid, secret )=>
-		ts = Date.now()
+		ts = moment().utc().format( "YYYYMMDDHHmmSS" )
 		_hs = "#{pid}::#{secret}::#{ts}"
 		_hash = crypto.createHash('sha1').update( _hs ).digest('hex')
 
@@ -55,7 +56,10 @@ module.exports = class ClickAndBuyPayment extends require( "../_base/payment" )
 		<externalID>#{@id}</externalID>
 	</details>
 </payRequest_Request>
-		"""
+		"""	
+
+		@debug "raw xml", _xml
+
 		_xml = new Buffer( _xml, 'utf8' )
 
 		opt = 

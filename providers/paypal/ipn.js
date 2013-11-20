@@ -17,7 +17,6 @@
       this.ERRORS = __bind(this.ERRORS, this);
       this.input = __bind(this.input, this);
       this.verify = __bind(this.verify, this);
-      this.answer200 = __bind(this.answer200, this);
       this.init = __bind(this.init, this);
       this.initialize = __bind(this.initialize, this);
       _ref = PayPalIpn.__super__.constructor.apply(this, arguments);
@@ -35,14 +34,8 @@
       if (!this.initialized) {
         this.initialized = true;
         server = this.main.getExpress();
-        server.post(this.config.receiverPath, this.answer200, this.verify, this.input);
+        server.post(this.config.receiverPath, this.verify, this.input);
       }
-    };
-
-    PayPalIpn.prototype.answer200 = function(req, res, next) {
-      this.debug("IPN Input", req.body);
-      res.send("OK");
-      next();
     };
 
     PayPalIpn.prototype.verify = function(req, res, next) {
@@ -66,23 +59,26 @@
         _this.info("VERIFY IPN MESSAGE", opt, err, body);
         if (err) {
           _this.error(err);
+          res.send("FAILED", 500);
           return;
         }
         if (body === "VERIFIED") {
           next();
         } else {
           _this.error(err);
+          res.send("FAILED", 500);
         }
       });
     };
 
-    PayPalIpn.prototype.input = function(req, res) {
-      var _amount, _atype, _currency, _pid, _receiver, _status,
+    PayPalIpn.prototype.input = function(req, res, next) {
+      var _amount, _atype, _currency, _pid, _receiver, _status, _transaction,
         _this = this;
       _pid = req.body.custom;
       _status = req.body.payment_status.toUpperCase();
       _receiver = req.body.receiver_email;
       _currency = req.body.mc_currency;
+      _transaction = req.body.txn_id;
       _atype = this._currencies[_currency];
       if (_atype === "int") {
         _amount = parseInt(req.body.mc_gross, 10);
@@ -94,11 +90,18 @@
           got: _receiver,
           needed: this.config.receiver_email
         });
+        res.send("FAILED", 500);
         return;
       }
       this.main.getPayment(_pid, function(err, payment) {
         if (err) {
+          if ((err != null ? err.name : void 0) === "EPAYMENTNOTFOUND") {
+            _this.warning("Payment not found in system so return a 200 to IPN");
+            res.send("NOTFOUND", 200);
+            return;
+          }
           _this.error(err);
+          res.send("FAILED", 500);
           return;
         }
         _this.debug("IPN returned", _pid, payment.valueOf());
@@ -107,6 +110,7 @@
             got: _currency,
             needed: payment.currency
           });
+          res.send("FAILED", 500);
           return;
         }
         if (Math.abs(_amount) !== payment.amount) {
@@ -114,19 +118,22 @@
             got: _amount,
             needed: payment.amount
           });
+          res.send("FAILED", 500);
           return;
         }
         payment.set("state", _status);
+        payment.set("transaction", _transaction);
         payment.set("verified", true);
         payment.persist(function(err) {
-          if (_status === "COMPLETED") {
-            if (err) {
-              _this.error(err);
-              return;
-            }
-            _this.main.emit("payment", "verfied", payment);
-            _this.main.emit("payment:" + payment.id, "verfied", payment);
+          if (err) {
+            _this.error(err);
+            res.send("FAILED", 500);
+            return;
           }
+          _this.main.emit("payment", "verfied", payment);
+          _this.main.emit("payment:" + payment.id, "verfied", payment);
+          _this.main.emit("verfied", payment);
+          res.send("OK");
         });
       });
     };

@@ -38,6 +38,10 @@ http://localhost:8888/pay/paypal?amount=0.01&desc=Cup%20of%20coffee&userid=123
     res.send("What a pity!");
   });
 
+  pymts.on("verfied", function(payment) {
+    console.log("PAYMENT VERIFIED\n", payment.valueOf());
+  });
+
   pymts.on("payment", function(type, payment) {
     console.log("PAYMENT ACTION: " + type + "\n", payment.valueOf());
   });

@@ -22,7 +22,8 @@
 		"lodash": "*",
 		"extend": "*",
 		"request": "*",
-		"colors": "*"
+		"colors": "*",
+		"moment": "*"
 	},
 	"devDependencies": {
 		"should": "*",

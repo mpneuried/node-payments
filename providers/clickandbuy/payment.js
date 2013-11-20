@@ -1,5 +1,5 @@
 (function() {
-  var ClickAndBuyPayment, config, crypto, querystring, request, _, _ref,
+  var ClickAndBuyPayment, config, crypto, moment, querystring, request, _, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -7,6 +7,8 @@
   querystring = require("querystring");
 
   crypto = require("crypto");
+
+  moment = require("moment");
 
   config = require("../../lib/config");
 
@@ -36,7 +38,7 @@
 
     ClickAndBuyPayment.prototype.createToken = function(pid, secret) {
       var ts, _hash, _hs;
-      ts = Date.now();
+      ts = moment().utc().format("YYYYMMDDHHmmSS");
       _hs = "" + pid + "::" + secret + "::" + ts;
       _hash = crypto.createHash('sha1').update(_hs).digest('hex');
       return ts + "::" + _hash;
@@ -44,7 +46,7 @@
 
     ClickAndBuyPayment.prototype.setAuthentication = function(cb) {
       var authHeader;
-      authHeader = "<authentication>\n	<merchantID>" + this.cbConfig.merchantid + "</merchantID>\n	<projectID>" + this.cbConfig.projectid + "</projectID>\n	<token>" + (this.createToken(this.cbConfig.projectid, this.cbConfig.cryptokey)) + "</token>\n</authentication>";
+      authHeader = "<authentication>\n	<merchantID>" + this.cbConfig.merchantid + "</merchantID>\n	<projectID>" + this.cbConfig.projectid + "</projectID>\n	<token>" + (this.createToken(this.cbConfig.projectid, this.cbConfig.cryptokey)) + "aaa</token>\n</authentication>";
       cb(null, authHeader);
     };
 
@@ -53,6 +55,7 @@
         _this = this;
       _urls = this.getUrls();
       _xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<payRequest_Request xmlns=\"http://api.clickandbuy.com/webservices/pay_1_1_0/\">\n	" + authHeader + "\n	<details>\n		<consumerCountry>" + this.cbConfig.localcode + "</consumerCountry>\n		<amount>\n			<amount>" + this.amount + "</amount>\n			<currency>" + this.currency + "</currency>\n		</amount>\n		<orderDetails>\n			<text>" + this.desc + "</text>\n		</orderDetails>\n		<successURL>" + _urls.success + "</successURL>\n		<failureURL>" + _urls.cancel + "</failureURL>\n		<externalID>" + this.id + "</externalID>\n	</details>\n</payRequest_Request>";
+      this.debug("raw xml", _xml);
       _xml = new Buffer(_xml, 'utf8');
       opt = {
         url: this.cbConfig.endpoint,

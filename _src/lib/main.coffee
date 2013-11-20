@@ -142,6 +142,7 @@ module.exports = class Payments extends require( "./basic" )
 					return
 				if not data?
 					@_handleError( cb, "EPAYMENTNOTFOUND", id: id )
+					return
 				@debug "got data from store", data
 				@createPayment data?.provider, data, ( err, payment )=>
 					if err
