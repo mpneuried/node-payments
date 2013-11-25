@@ -219,14 +219,19 @@
     };
 
     BasePayment.prototype.getUrls = function() {
-      var _host, _port, _pre, _secure;
-      _secure = config.get("serverSecure");
-      _port = this.ownProvider.main.redir.port;
-      _host = this.ownProvider.main.redir.host || "localhost";
-      _pre = _secure ? "https://" : "http://";
-      _pre += _host;
-      if (_port !== 80) {
-        _pre += ":" + _port;
+      var redirprefix, _host, _port, _pre, _secure;
+      redirprefix = config.get("redirprefix");
+      if (redirprefix != null ? redirprefix.length : void 0) {
+        _pre = redirprefix.replace(/\/$/g, "");
+      } else {
+        _secure = config.get("serverSecure");
+        _port = this.ownProvider.main.redir.port;
+        _host = this.ownProvider.main.redir.host || "localhost";
+        _pre = _secure ? "https://" : "http://";
+        _pre += _host;
+        if (_port !== 80) {
+          _pre += ":" + _port;
+        }
       }
       return this.ownProvider.main.getUrls(this.id, _pre);
     };

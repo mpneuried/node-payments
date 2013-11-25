@@ -1,6 +1,8 @@
 DEFAULT = 
 	# this is the basic route the module will add it's required routes
 	baseroute: "/payment/"
+	# the prefix to generate the redirect link e.g. `http://localhost:8888/`
+	redirprefix: null
 
 	# In production mode a external message ( ipn/mms/... ) will only answerd with HTTP:200 if everything succeeded.
 	# In an non productive mode it will also answer if the payment has not been foun within the payment store.

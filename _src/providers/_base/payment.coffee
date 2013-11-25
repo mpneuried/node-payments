@@ -146,14 +146,18 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		return
 
 	getUrls: =>
-		_secure = config.get( "serverSecure" )
-		_port = @ownProvider.main.redir.port
-		_host = @ownProvider.main.redir.host or "localhost"
-		
-		_pre = if _secure then "https://" else "http://"
-		_pre += _host
-		if _port isnt 80
-			_pre += ":" + _port
+		redirprefix = config.get( "redirprefix" )
+		if redirprefix?.length
+			_pre = redirprefix.replace( /\/$/g, "" )
+		else
+			_secure = config.get( "serverSecure" )
+			_port = @ownProvider.main.redir.port
+			_host = @ownProvider.main.redir.host or "localhost"
+			
+			_pre = if _secure then "https://" else "http://"
+			_pre += _host
+			if _port isnt 80
+				_pre += ":" + _port
 
 		return @ownProvider.main.getUrls( @id, _pre )
 

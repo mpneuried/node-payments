@@ -12,7 +12,6 @@ module.exports = class RedirServer extends require( "./basic" )
 			_listen = express.listen
 			express.listen = ( port, host )=>
 				@port = port
-				@port = port
 				_listen.apply( express, arguments )
 				return
 			@server = express
