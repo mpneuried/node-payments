@@ -54,7 +54,6 @@ module.exports = class PaypalPayment extends require( "../_base/payment" )
 			method: "POST"
 			form: @extend( data, auth )
 				
-
 		@debug "send paypal payment", JSON.stringify( opt, true, 4 )
 		request opt, ( err, response, rbody )=>
 			body = querystring.parse( rbody )
@@ -66,6 +65,8 @@ module.exports = class PaypalPayment extends require( "../_base/payment" )
 				else
 					cb( body )
 				return
+
+			@set "rawProviderState", body.PAYMENTINFO_0_PAYMENTSTATUS
 
 			link = _.template( @ppcConfig.linkTemplate, token: body.TOKEN )
 			@debug "paypal payment response", body, link
@@ -96,7 +97,6 @@ module.exports = class PaypalPayment extends require( "../_base/payment" )
 			method: "POST"
 			form: @extend( data, auth )
 				
-
 		@debug "send paypal payment", JSON.stringify( opt, true, 4 )
 		request opt, ( err, response, rbody )=>
 			body = querystring.parse( rbody )
@@ -108,6 +108,8 @@ module.exports = class PaypalPayment extends require( "../_base/payment" )
 				else
 					cb( body )
 				return
+
+			@set "rawProviderState", body.PAYMENTINFO_0_PAYMENTSTATUS
 
 			_state = body.PAYMENTINFO_0_PAYMENTSTATUS.toUpperCase()
 			@info "EXEC RESPONSE", JSON.stringify( body, true, 4 )

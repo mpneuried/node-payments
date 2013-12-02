@@ -111,13 +111,14 @@ module.exports = class Payments extends require( "./basic" )
 			if err
 				cb( err )
 				return
-			payment.payer_id = payer_id
+			payment.payer_id = payer_id if payer_id?
 			@debug "payment for execution", payment.valueOf()
 			payment._executePayment token, ( err )=>
 				if err
 					cb( err )
 					return
 				cb( null, payment )
+				return
 			return
 		return
 

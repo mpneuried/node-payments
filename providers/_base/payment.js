@@ -35,6 +35,8 @@
       this._getPayerID = __bind(this._getPayerID, this);
       this._setPayID = __bind(this._setPayID, this);
       this._getPayID = __bind(this._getPayID, this);
+      this._setProviderState = __bind(this._setProviderState, this);
+      this._getProviderState = __bind(this._getProviderState, this);
       this._setState = __bind(this._setState, this);
       this._getState = __bind(this._getState, this);
       this._setDesc = __bind(this._setDesc, this);
@@ -69,6 +71,7 @@
       this.define("currency", this._getCurrency, this._setCurrency);
       this.define("desc", this._getDesc, this._setDesc);
       this.define("state", this._getState, this._setState);
+      this.define("rawProviderState", this._getProviderState, this._setProviderState);
       this.define("pay_id", this._getPayID, this._setPayID);
       this.define("payer_id", this._getPayerID, this._setPayerID);
       this.define("verified", this._getVerified, this._setVerified);
@@ -149,13 +152,16 @@
           cb(err);
           return;
         }
-        _this.requestProvider(auth, function(err, id, link) {
+        _this.requestProvider(auth, function(err, id, link, transaction) {
           if (err) {
             cb(err);
             return;
           }
           _this.set("state", "CREATED");
           _this.set("pay_id", id);
+          if (transaction != null) {
+            _this.set("transaction", transaction);
+          }
           _this.emit("exec", _this);
           _this.emit("dispose", _this);
           cb(null, link);
@@ -294,12 +300,22 @@
 
     BasePayment.prototype._setState = function(val) {
       var _states;
-      _states = ["NEW", "CREATED", "ACCEPTED", "PENDING", "APPROVED", "COMPLETED", "CANCELD", "REFUNDED"];
+      _states = ["NEW", "CREATED", "ACCEPTED", "CREATED", "APPROVED", "IN_PROGRESS", "COMPLETED", "CANCELD", "REFUNDED", "UNKONWN"];
       if (__indexOf.call(_states, val) >= 0 && _states.indexOf(this.state) <= _states.indexOf(val)) {
         this.set("state", val);
         return;
       } else {
         this.warning("tried to set a invalid state: `" + val + "`");
+      }
+    };
+
+    BasePayment.prototype._getProviderState = function() {
+      return this.get("rawProviderState") || null;
+    };
+
+    BasePayment.prototype._setProviderState = function(val) {
+      if (val != null ? val.length : void 0) {
+        this.set("rawProviderState", val);
       }
     };
 

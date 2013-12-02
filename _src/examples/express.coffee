@@ -16,12 +16,15 @@ app.use( express.urlencoded() )
 app.use( express.json() )
 app.use( express.logger( "dev" ) )
 
+redisPaymentStore = new ( require( "./redisstore" ) ) 
+
 # get the local testing configuration
 _configTest = JSON.parse( fs.readFileSync( path.resolve( __dirname + "/../config_test.json" ) ) )
 
 # reuse the existing express
 
 _configTest.express = app
+_configTest.paymentStore = redisPaymentStore
 
 # init node-payments
 Payments = require( "../." )

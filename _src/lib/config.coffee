@@ -39,9 +39,10 @@ DEFAULT =
 		ipnTarget: "https://www.sandbox.paypal.com/cgi-bin/webscr?"
 
 	clickandbuy: 
+		# sandbox host `https://api.clickandbuy-s1.com`
 		endpoint: "https://api.clickandbuy.com/webservices/soap/pay_1_1_0/"
-		merchantid: "REPLACE-THIS",
-		projectid: "REPLACE-THIS",
+		merchantid: "REPLACE-THIS"
+		projectid: "REPLACE-THIS"
 		cryptokey: "REPLACE-THIS"
 		localcode: "DE"
 
@@ -66,7 +67,8 @@ DEFAULT =
 	clickandbuymms: 
 
 		# internal ipn route to get mms messages from click&buy
-		receiverPath: "/ipntest/clickandbuy"
+		receiverPath: "/cabtest/clickandbuy"
+		cryptokey: "REPLACE-THIS"
 
 
 	# use this currency if no currencie has been defined
@@ -109,7 +111,7 @@ class Config
 
 	get: ( name, logging = false )=>
 		
-		_cnf = @config[ name ] or null
+		_cnf = @config?[ name ] or null
 		if logging
 
 			logging = 

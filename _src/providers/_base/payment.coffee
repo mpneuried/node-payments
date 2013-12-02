@@ -21,6 +21,7 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		@define( "currency", @_getCurrency, @_setCurrency )
 		@define( "desc", @_getDesc, @_setDesc )
 		@define( "state", @_getState, @_setState )
+		@define( "rawProviderState", @_getProviderState, @_setProviderState )
 		@define( "pay_id", @_getPayID, @_setPayID )
 		@define( "payer_id", @_getPayerID, @_setPayerID )
 		@define( "verified", @_getVerified, @_setVerified )
@@ -84,12 +85,13 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 				return
 
 			# execute the payment
-			@requestProvider auth, ( err, id, link )=>
+			@requestProvider auth, ( err, id, link, transaction )=>
 				if err
 					cb( err )
 					return
 				@set( "state", "CREATED" )
 				@set( "pay_id", id )
+				@set( "transaction", transaction ) if transaction?
 				@emit( "exec", @ )
 				@emit( "dispose", @ )
 				cb( null, link )
@@ -215,12 +217,21 @@ module.exports = class BasePayment extends require( "../../lib/basic" )
 		return @get( "state" ) or "NEW"
 
 	_setState: ( val )=>
-		_states = [ "NEW", "CREATED", "ACCEPTED", "PENDING", "APPROVED", "COMPLETED", "CANCELD", "REFUNDED" ]
+		_states = [ "NEW", "CREATED", "ACCEPTED", "CREATED", "APPROVED", "IN_PROGRESS", "COMPLETED", "CANCELD", "REFUNDED", "UNKONWN" ]
 		if val in _states and _states.indexOf( @state ) <= _states.indexOf( val ) 
 			@set( "state", val )
 			return
 		else
 			@warning "tried to set a invalid state: `#{val}`"
+		return
+
+	# (G/S)ETTER for `rawProviderState`
+	_getProviderState: =>
+		return @get( "rawProviderState" ) or null
+
+	_setProviderState: ( val )=>
+		if val?.length
+			@set( "rawProviderState", val )
 		return
 
 	# (G/S)ETTER for `pay_id`

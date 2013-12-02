@@ -6,7 +6,7 @@ http://localhost:8888/pay/paypal?amount=0.01&desc=Cup%20of%20coffee&userid=123
 
 
 (function() {
-  var Payments, app, express, fs, path, pymts, _configTest, _port;
+  var Payments, app, express, fs, path, pymts, redisPaymentStore, _configTest, _port;
 
   fs = require("fs");
 
@@ -22,9 +22,13 @@ http://localhost:8888/pay/paypal?amount=0.01&desc=Cup%20of%20coffee&userid=123
 
   app.use(express.logger("dev"));
 
+  redisPaymentStore = new (require("./redisstore"));
+
   _configTest = JSON.parse(fs.readFileSync(path.resolve(__dirname + "/../config_test.json")));
 
   _configTest.express = app;
+
+  _configTest.paymentStore = redisPaymentStore;
 
   Payments = require("../.");
 

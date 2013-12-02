@@ -84,6 +84,7 @@ class PayPalIpn extends require( "../_base/main" )
 				res.send( "FAILED", 500 )
 				return
 
+			payment.set( "rawProviderState", body.PAYMENTINFO_0_PAYMENTSTATUS )
 			payment.set( "state", _status )
 			payment.set( "transaction", _transaction )
 			payment.set( "verified", true )
@@ -103,7 +104,7 @@ class PayPalIpn extends require( "../_base/main" )
 	ERRORS: =>
 		@extend super, 
 			"EPPIPNINVALIDRECEIVER": "The paypal IPN sends a completed message for a wrong receiver. Has to be `<%= needed %>` bot got `<%= got %>`."
-			"EPPIPNINVALIDAMOUNT": "The paypal IPN sends a currency unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`."			
+			"EPPIPNINVALIDCURRENCY": "The paypal IPN sends a currency unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`."			
 			"EPPIPNINVALIDAMOUNT": "The paypal IPN sends a amount unlike the expected. Has to be `<%= needed %>` bot got `<%= got %>`."			
 
 module.exports = new PayPalIpn()

@@ -88,6 +88,7 @@
           }
           return;
         }
+        _this.set("rawProviderState", body.PAYMENTINFO_0_PAYMENTSTATUS);
         link = _.template(_this.ppcConfig.linkTemplate, {
           token: body.TOKEN
         });
@@ -132,6 +133,7 @@
           }
           return;
         }
+        _this.set("rawProviderState", body.PAYMENTINFO_0_PAYMENTSTATUS);
         _state = body.PAYMENTINFO_0_PAYMENTSTATUS.toUpperCase();
         _this.info("EXEC RESPONSE", JSON.stringify(body, true, 4));
         cb(null, _state);

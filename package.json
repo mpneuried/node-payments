@@ -2,7 +2,7 @@
 	"author": "mp (www.tcs.de)",
 	"name": "node-payments",
 	"description": "A wrapper for differnet pament systems",
-	"version": "0.0.8",
+	"version": "0.1.0",
 	"homepage": "https://github.com/mpneuried/node-payments",
 	"private": false,
 	"repository": {
@@ -23,7 +23,9 @@
 		"extend": "*",
 		"request": "*",
 		"colors": "*",
-		"moment": "*"
+		"moment": "*",
+		"xml2js": "*",
+		"async": "*"
 	},
 	"devDependencies": {
 		"should": "*",
@@ -34,6 +36,7 @@
 		"grunt-include-replace": "*",
 		"grunt-mocha-cli": "*",
 
-		"express": "*"
+		"express": "*",
+		"redis": "*"
 	}
 }
