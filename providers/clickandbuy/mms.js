@@ -167,16 +167,14 @@
           payment.set("transaction", _transaction);
           payment.set("verified", true);
           payment.persist(function(err) {
-            if (_state === "COMPLETED") {
-              if (err) {
-                cb(err);
-                return;
-              }
-              _this.main.emit("payment", "verfied", payment);
-              _this.main.emit("payment:" + payment.id, "verfied", payment);
-              _this.main.emit("verfied", payment);
-              cb(null);
+            if (err) {
+              cb(err);
+              return;
             }
+            _this.main.emit("payment", "verfied", payment);
+            _this.main.emit("payment:" + payment.id, "verfied", payment);
+            _this.main.emit("verfied", payment);
+            cb(null);
           });
         });
       };

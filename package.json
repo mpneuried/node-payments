@@ -2,7 +2,7 @@
 	"author": "mp (www.tcs.de)",
 	"name": "node-payments",
 	"description": "A wrapper for differnet pament systems",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"homepage": "https://github.com/mpneuried/node-payments",
 	"private": false,
 	"repository": {

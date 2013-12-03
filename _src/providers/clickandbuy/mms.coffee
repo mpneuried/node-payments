@@ -68,7 +68,6 @@ class ClickAndBuyMMS extends require( "../_base/main" )
 
 	input: ( req, res )=>
 		afns = []
-		
 		for _event in req._mmsevents
 			afns.push( @processEvent( _event ) )
 
@@ -124,14 +123,13 @@ class ClickAndBuyMMS extends require( "../_base/main" )
 				payment.set( "transaction", _transaction )
 				payment.set( "verified", true )
 				payment.persist ( err )=>
-					if _state is "COMPLETED"
-						if err
-							cb( err )
-							return
-						@main.emit( "payment", "verfied", payment )
-						@main.emit( "payment:#{payment.id}", "verfied", payment )
-						@main.emit( "verfied", payment )
-						cb( null )
+					if err
+						cb( err )
+						return
+					@main.emit( "payment", "verfied", payment )
+					@main.emit( "payment:#{payment.id}", "verfied", payment )
+					@main.emit( "verfied", payment )
+					cb( null )
 					return
 				return
 			return
