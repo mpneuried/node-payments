@@ -83,54 +83,59 @@ class ClickAndBuyMMS extends require( "../_base/main" )
 
 	processEvent: ( data )=>
 		return ( cb )=>
-			_pid = data.externalID[ 0 ]
-			_rawstate = data.newState[ 0 ]
-			_transaction = data.transactionID[ 0 ]
-			_merchantID = data.merchantID[ 0 ]
-			_dataAmout = data.merchantAmount[ 0 ]
-			_currency = _dataAmout.currency[ 0 ]
-			_payer = data.crn?[ 0 ]
-			_atype = @_currencies[ _currency ]
-			if _atype is "int"
-				_amount = parseInt( _dataAmout.amount[ 0 ], 10 )
-			else
-				_amount = parseFloat( _dataAmout.amount[ 0 ], 10 )
+			try
+				_pid = data.externalID[ 0 ]
+				_rawstate = data.newState[ 0 ]
+				_transaction = data.transactionID[ 0 ]
+				_merchantID = data.merchantID[ 0 ]
+				_dataAmout = data.merchantAmount[ 0 ]
+				_currency = _dataAmout.currency[ 0 ]
+				_payer = data.crn?[ 0 ]
+				_atype = @_currencies[ _currency ]
+				if _atype is "int"
+					_amount = parseInt( _dataAmout.amount[ 0 ], 10 )
+				else
+					_amount = parseFloat( _dataAmout.amount[ 0 ], 10 )
 
-			if @cbConfig.merchantid? and _merchantID isnt @cbConfig.merchantid
-				@_handleError( cb, "ECBMMSINVALIDMERCHANT", { got: _merchantID, needed: @cbConfig.merchantid } )
-				return
-			
-			@main.getPayment _pid, ( err, payment )=>
-				if err
-					cb( err )
+				if @cbConfig.merchantid? and _merchantID isnt @cbConfig.merchantid
+					@_handleError( cb, "ECBMMSINVALIDMERCHANT", { got: _merchantID, needed: @cbConfig.merchantid } )
 					return
 				
-				@debug "MMS returned", _pid, payment.valueOf()
-
-				if _currency isnt payment.currency
-					@_handleError( cb, "ECBMMSINVALIDCURRENCY", { got: _currency, needed: payment.currency } )
-					return
-
-				if Math.abs( _amount ) isnt payment.amount
-					@_handleError( cb, "ECBMMSINVALIDAMOUNT", { got: _amount, needed: payment.amount } )
-					return
-
-				_state = payment._translateState( _rawstate )
-				payment.set( "rawProviderState", _rawstate )
-				payment.set( "payer_id", _payer ) if _payer?.length
-
-				payment.set( "state", _state )
-				payment.set( "transaction", _transaction )
-				payment.set( "verified", true )
-				payment.persist ( err )=>
+				@main.getPayment _pid, ( err, payment )=>
 					if err
 						cb( err )
 						return
-					@main.emit( "payment", "verfied", payment )
-					@main.emit( "payment:#{payment.id}", "verfied", payment )
-					@main.emit( "verfied", payment )
-					cb( null )
+					
+					@debug "MMS returned", _pid, payment.valueOf()
+
+					if _currency isnt payment.currency
+						@_handleError( cb, "ECBMMSINVALIDCURRENCY", { got: _currency, needed: payment.currency } )
+						return
+
+					if Math.abs( _amount ) isnt payment.amount
+						@_handleError( cb, "ECBMMSINVALIDAMOUNT", { got: _amount, needed: payment.amount } )
+						return
+
+					_state = payment._translateState( _rawstate )
+					payment.set( "rawProviderState", _rawstate )
+					payment.set( "payer_id", _payer ) if _payer?.length
+
+					payment.set( "state", _state )
+					payment.set( "transaction", _transaction )
+					payment.set( "verified", true )
+					payment.persist ( err )=>
+						if err
+							cb( err )
+							return
+						@main.emit( "payment", "verfied", payment )
+						@main.emit( "payment:#{payment.id}", "verfied", payment )
+						@main.emit( "verfied", payment )
+						cb( null )
+						return
 					return
+			catch _err
+				@error( _err )
+				res.send( "FAILED", 500 )
 				return
 			return
 

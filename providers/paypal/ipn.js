@@ -72,71 +72,78 @@
     };
 
     PayPalIpn.prototype.input = function(req, res, next) {
-      var _amount, _atype, _currency, _pid, _receiver, _status, _transaction,
+      var _amount, _atype, _currency, _err, _pid, _receiver, _status, _transaction,
         _this = this;
-      _pid = req.body.custom;
-      _status = req.body.payment_status.toUpperCase();
-      _receiver = req.body.receiver_email;
-      _currency = req.body.mc_currency;
-      _transaction = req.body.txn_id;
-      _atype = this._currencies[_currency];
-      if (_atype === "int") {
-        _amount = parseInt(req.body.mc_gross, 10);
-      } else {
-        _amount = parseFloat(req.body.mc_gross, 10);
-      }
-      if ((this.config.receiver_email != null) && _receiver !== this.config.receiver_email) {
-        this._handleError(null, "EPPIPNINVALIDRECEIVER", {
-          got: _receiver,
-          needed: this.config.receiver_email
-        });
-        res.send("FAILED", 500);
-        return;
-      }
-      this.main.getPayment(_pid, function(err, payment) {
-        if (err) {
-          if (!config.get("productionmode") && (err != null ? err.name : void 0) === "EPAYMENTNOTFOUND") {
-            _this.warning("Payment not found in system so return a 200 to IPN");
-            res.send("NOTFOUND", 200);
-            return;
-          }
-          _this.error(err);
-          res.send("FAILED", 500);
-          return;
+      try {
+        _pid = req.body.custom;
+        _status = req.body.payment_status.toUpperCase();
+        _receiver = req.body.receiver_email;
+        _currency = req.body.mc_currency;
+        _transaction = req.body.txn_id;
+        _atype = this._currencies[_currency];
+        if (_atype === "int") {
+          _amount = parseInt(req.body.mc_gross, 10);
+        } else {
+          _amount = parseFloat(req.body.mc_gross, 10);
         }
-        _this.debug("IPN returned", _pid, payment.valueOf());
-        if (_currency !== payment.currency) {
-          _this._handleError(null, "EPPIPNINVALIDCURRENCY", {
-            got: _currency,
-            needed: payment.currency
+        if ((this.config.receiver_email != null) && _receiver !== this.config.receiver_email) {
+          this._handleError(null, "EPPIPNINVALIDRECEIVER", {
+            got: _receiver,
+            needed: this.config.receiver_email
           });
           res.send("FAILED", 500);
           return;
         }
-        if (Math.abs(_amount) !== payment.amount) {
-          _this._handleError(null, "EPPIPNINVALIDAMOUNT", {
-            got: _amount,
-            needed: payment.amount
-          });
-          res.send("FAILED", 500);
-          return;
-        }
-        payment.set("rawProviderState", body.PAYMENTINFO_0_PAYMENTSTATUS);
-        payment.set("state", _status);
-        payment.set("transaction", _transaction);
-        payment.set("verified", true);
-        payment.persist(function(err) {
+        this.main.getPayment(_pid, function(err, payment) {
           if (err) {
+            if (!config.get("productionmode") && (err != null ? err.name : void 0) === "EPAYMENTNOTFOUND") {
+              _this.warning("Payment not found in system so return a 200 to IPN");
+              res.send("NOTFOUND", 200);
+              return;
+            }
             _this.error(err);
             res.send("FAILED", 500);
             return;
           }
-          _this.main.emit("payment", "verfied", payment);
-          _this.main.emit("payment:" + payment.id, "verfied", payment);
-          _this.main.emit("verfied", payment);
-          res.send("OK");
+          _this.debug("IPN returned", _pid, payment.valueOf());
+          if (_currency !== payment.currency) {
+            _this._handleError(null, "EPPIPNINVALIDCURRENCY", {
+              got: _currency,
+              needed: payment.currency
+            });
+            res.send("FAILED", 500);
+            return;
+          }
+          if (Math.abs(_amount) !== payment.amount) {
+            _this._handleError(null, "EPPIPNINVALIDAMOUNT", {
+              got: _amount,
+              needed: payment.amount
+            });
+            res.send("FAILED", 500);
+            return;
+          }
+          payment.set("rawProviderState", req.body.payment_status);
+          payment.set("state", _status);
+          payment.set("transaction", _transaction);
+          payment.set("verified", true);
+          payment.persist(function(err) {
+            if (err) {
+              _this.error(err);
+              res.send("FAILED", 500);
+              return;
+            }
+            _this.main.emit("payment", "verfied", payment);
+            _this.main.emit("payment:" + payment.id, "verfied", payment);
+            _this.main.emit("verfied", payment);
+            res.send("OK");
+          });
         });
-      });
+      } catch (_error) {
+        _err = _error;
+        this.error(_err);
+        res.send("FAILED", 500);
+        return;
+      }
     };
 
     PayPalIpn.prototype.ERRORS = function() {

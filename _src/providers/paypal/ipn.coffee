@@ -46,59 +46,65 @@ class PayPalIpn extends require( "../_base/main" )
 		return
 
 	input: ( req, res, next )=>
-		_pid = req.body.custom
-		_status = req.body.payment_status.toUpperCase()
-		_receiver = req.body.receiver_email
-		_currency = req.body.mc_currency
-		_transaction = req.body.txn_id
-		_atype = @_currencies[ _currency ]
-		if _atype is "int"
-			_amount = parseInt( req.body.mc_gross, 10 )
-		else
-			_amount = parseFloat( req.body.mc_gross, 10 )
+		try
+			_pid = req.body.custom
+			_status = req.body.payment_status.toUpperCase()
+			_receiver = req.body.receiver_email
+			_currency = req.body.mc_currency
+			_transaction = req.body.txn_id
+			_atype = @_currencies[ _currency ]
+			if _atype is "int"
+				_amount = parseInt( req.body.mc_gross, 10 )
+			else
+				_amount = parseFloat( req.body.mc_gross, 10 )
 
-		if @config.receiver_email? and _receiver isnt @config.receiver_email
-			@_handleError( null, "EPPIPNINVALIDRECEIVER", { got: _receiver, needed: @config.receiver_email } )
-			res.send( "FAILED", 500 )
-			return
-
-		@main.getPayment _pid, ( err, payment )=>
-			if err
-				if not config.get( "productionmode" ) and err?.name is "EPAYMENTNOTFOUND"
-					@warning( "Payment not found in system so return a 200 to IPN" )
-					res.send( "NOTFOUND", 200 )
-					return
-				@error( err )
-				res.send( "FAILED", 500 )
-				return
-			
-			@debug "IPN returned", _pid, payment.valueOf()
-
-			if _currency isnt payment.currency
-				@_handleError( null, "EPPIPNINVALIDCURRENCY", { got: _currency, needed: payment.currency } )
+			if @config.receiver_email? and _receiver isnt @config.receiver_email
+				@_handleError( null, "EPPIPNINVALIDRECEIVER", { got: _receiver, needed: @config.receiver_email } )
 				res.send( "FAILED", 500 )
 				return
 
-			if Math.abs( _amount ) isnt payment.amount
-				@_handleError( null, "EPPIPNINVALIDAMOUNT", { got: _amount, needed: payment.amount } )
-				res.send( "FAILED", 500 )
-				return
-
-			payment.set( "rawProviderState", body.PAYMENTINFO_0_PAYMENTSTATUS )
-			payment.set( "state", _status )
-			payment.set( "transaction", _transaction )
-			payment.set( "verified", true )
-			payment.persist ( err )=>
+			@main.getPayment _pid, ( err, payment )=>
 				if err
+					if not config.get( "productionmode" ) and err?.name is "EPAYMENTNOTFOUND"
+						@warning( "Payment not found in system so return a 200 to IPN" )
+						res.send( "NOTFOUND", 200 )
+						return
 					@error( err )
 					res.send( "FAILED", 500 )
 					return
-				@main.emit( "payment", "verfied", payment )
-				@main.emit( "payment:#{payment.id}", "verfied", payment )
-				@main.emit( "verfied", payment )
-				res.send( "OK" )
+				
+				@debug "IPN returned", _pid, payment.valueOf()
+
+				if _currency isnt payment.currency
+					@_handleError( null, "EPPIPNINVALIDCURRENCY", { got: _currency, needed: payment.currency } )
+					res.send( "FAILED", 500 )
+					return
+
+				if Math.abs( _amount ) isnt payment.amount
+					@_handleError( null, "EPPIPNINVALIDAMOUNT", { got: _amount, needed: payment.amount } )
+					res.send( "FAILED", 500 )
+					return
+
+				payment.set( "rawProviderState", req.body.payment_status )
+				payment.set( "state", _status )
+				payment.set( "transaction", _transaction )
+				payment.set( "verified", true )
+				payment.persist ( err )=>
+					if err
+						@error( err )
+						res.send( "FAILED", 500 )
+						return
+					@main.emit( "payment", "verfied", payment )
+					@main.emit( "payment:#{payment.id}", "verfied", payment )
+					@main.emit( "verfied", payment )
+					res.send( "OK" )
+					return
 				return
+		catch _err
+			@error( _err )
+			res.send( "FAILED", 500 )
 			return
+
 		return
 
 	ERRORS: =>

@@ -116,67 +116,74 @@
     ClickAndBuyMMS.prototype.processEvent = function(data) {
       var _this = this;
       return function(cb) {
-        var _amount, _atype, _currency, _dataAmout, _merchantID, _payer, _pid, _rawstate, _ref1, _transaction;
-        _pid = data.externalID[0];
-        _rawstate = data.newState[0];
-        _transaction = data.transactionID[0];
-        _merchantID = data.merchantID[0];
-        _dataAmout = data.merchantAmount[0];
-        _currency = _dataAmout.currency[0];
-        _payer = (_ref1 = data.crn) != null ? _ref1[0] : void 0;
-        _atype = _this._currencies[_currency];
-        if (_atype === "int") {
-          _amount = parseInt(_dataAmout.amount[0], 10);
-        } else {
-          _amount = parseFloat(_dataAmout.amount[0], 10);
-        }
-        if ((_this.cbConfig.merchantid != null) && _merchantID !== _this.cbConfig.merchantid) {
-          _this._handleError(cb, "ECBMMSINVALIDMERCHANT", {
-            got: _merchantID,
-            needed: _this.cbConfig.merchantid
-          });
-          return;
-        }
-        _this.main.getPayment(_pid, function(err, payment) {
-          var _state;
-          if (err) {
-            cb(err);
-            return;
+        var _amount, _atype, _currency, _dataAmout, _err, _merchantID, _payer, _pid, _rawstate, _ref1, _transaction;
+        try {
+          _pid = data.externalID[0];
+          _rawstate = data.newState[0];
+          _transaction = data.transactionID[0];
+          _merchantID = data.merchantID[0];
+          _dataAmout = data.merchantAmount[0];
+          _currency = _dataAmout.currency[0];
+          _payer = (_ref1 = data.crn) != null ? _ref1[0] : void 0;
+          _atype = _this._currencies[_currency];
+          if (_atype === "int") {
+            _amount = parseInt(_dataAmout.amount[0], 10);
+          } else {
+            _amount = parseFloat(_dataAmout.amount[0], 10);
           }
-          _this.debug("MMS returned", _pid, payment.valueOf());
-          if (_currency !== payment.currency) {
-            _this._handleError(cb, "ECBMMSINVALIDCURRENCY", {
-              got: _currency,
-              needed: payment.currency
+          if ((_this.cbConfig.merchantid != null) && _merchantID !== _this.cbConfig.merchantid) {
+            _this._handleError(cb, "ECBMMSINVALIDMERCHANT", {
+              got: _merchantID,
+              needed: _this.cbConfig.merchantid
             });
             return;
           }
-          if (Math.abs(_amount) !== payment.amount) {
-            _this._handleError(cb, "ECBMMSINVALIDAMOUNT", {
-              got: _amount,
-              needed: payment.amount
-            });
-            return;
-          }
-          _state = payment._translateState(_rawstate);
-          payment.set("rawProviderState", _rawstate);
-          if (_payer != null ? _payer.length : void 0) {
-            payment.set("payer_id", _payer);
-          }
-          payment.set("state", _state);
-          payment.set("transaction", _transaction);
-          payment.set("verified", true);
-          payment.persist(function(err) {
+          _this.main.getPayment(_pid, function(err, payment) {
+            var _state;
             if (err) {
               cb(err);
               return;
             }
-            _this.main.emit("payment", "verfied", payment);
-            _this.main.emit("payment:" + payment.id, "verfied", payment);
-            _this.main.emit("verfied", payment);
-            cb(null);
+            _this.debug("MMS returned", _pid, payment.valueOf());
+            if (_currency !== payment.currency) {
+              _this._handleError(cb, "ECBMMSINVALIDCURRENCY", {
+                got: _currency,
+                needed: payment.currency
+              });
+              return;
+            }
+            if (Math.abs(_amount) !== payment.amount) {
+              _this._handleError(cb, "ECBMMSINVALIDAMOUNT", {
+                got: _amount,
+                needed: payment.amount
+              });
+              return;
+            }
+            _state = payment._translateState(_rawstate);
+            payment.set("rawProviderState", _rawstate);
+            if (_payer != null ? _payer.length : void 0) {
+              payment.set("payer_id", _payer);
+            }
+            payment.set("state", _state);
+            payment.set("transaction", _transaction);
+            payment.set("verified", true);
+            payment.persist(function(err) {
+              if (err) {
+                cb(err);
+                return;
+              }
+              _this.main.emit("payment", "verfied", payment);
+              _this.main.emit("payment:" + payment.id, "verfied", payment);
+              _this.main.emit("verfied", payment);
+              cb(null);
+            });
           });
-        });
+        } catch (_error) {
+          _err = _error;
+          _this.error(_err);
+          res.send("FAILED", 500);
+          return;
+        }
       };
     };
 
