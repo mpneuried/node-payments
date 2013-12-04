@@ -1,11 +1,12 @@
-exports.version = '@@version'
+module.exports = require './lib/main'
 
-exports.config = require './lib/config'
-exports.Redirects = require './lib/redirects'
-exports.MemoryStore = require './lib/paymentstores/memorystore'
+module.exports.version = '@@version'
 
-exports.providers =
+module.exports.config = require './lib/config'
+module.exports.Redirects = require './lib/redirects'
+module.exports.MemoryStore = require './lib/paymentstores/memorystore'
+module.exports.RedisHashStore = require './lib/paymentstores/redishashstore'
+
+module.exports.providers =
 	Base: require './providers/_base/.'
 	Paypal: require './providers/paypal/.'
-
-module.exports = require './lib/main'

@@ -139,8 +139,13 @@
             return;
           }
           _this.main.getPayment(_pid, function(err, payment) {
-            var _state;
+            var _err, _state;
             if (err) {
+              if (!config.get("productionmode") && (err != null ? err.name : void 0) === "EPAYMENTNOTFOUND") {
+                _this.warning("Payment not found in system so return a 200 to IPN");
+                cb(null);
+                return;
+              }
               cb(err);
               return;
             }
@@ -159,14 +164,21 @@
               });
               return;
             }
-            _state = payment._translateState(_rawstate);
-            payment.set("rawProviderState", _rawstate);
-            if (_payer != null ? _payer.length : void 0) {
-              payment.set("payer_id", _payer);
+            try {
+              _state = payment._translateState(_rawstate);
+              payment.set("rawProviderState", _rawstate);
+              if (_payer != null ? _payer.length : void 0) {
+                payment.set("payer_id", _payer);
+              }
+              payment.set("state", _state);
+              payment.set("transaction", _transaction);
+              payment.set("verified", true);
+            } catch (_error) {
+              _err = _error;
+              _this.error(_err);
+              cb(_err);
+              return;
             }
-            payment.set("state", _state);
-            payment.set("transaction", _transaction);
-            payment.set("verified", true);
             payment.persist(function(err) {
               if (err) {
                 cb(err);
@@ -181,7 +193,7 @@
         } catch (_error) {
           _err = _error;
           _this.error(_err);
-          res.send("FAILED", 500);
+          cb(_err);
           return;
         }
       };

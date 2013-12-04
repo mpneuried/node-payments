@@ -103,6 +103,10 @@ class ClickAndBuyMMS extends require( "../_base/main" )
 				
 				@main.getPayment _pid, ( err, payment )=>
 					if err
+						if not config.get( "productionmode" ) and err?.name is "EPAYMENTNOTFOUND"
+							@warning( "Payment not found in system so return a 200 to IPN" )
+							cb( null )
+							return
 						cb( err )
 						return
 					
@@ -116,13 +120,18 @@ class ClickAndBuyMMS extends require( "../_base/main" )
 						@_handleError( cb, "ECBMMSINVALIDAMOUNT", { got: _amount, needed: payment.amount } )
 						return
 
-					_state = payment._translateState( _rawstate )
-					payment.set( "rawProviderState", _rawstate )
-					payment.set( "payer_id", _payer ) if _payer?.length
+					try
+						_state = payment._translateState( _rawstate )
+						payment.set( "rawProviderState", _rawstate )
+						payment.set( "payer_id", _payer ) if _payer?.length
 
-					payment.set( "state", _state )
-					payment.set( "transaction", _transaction )
-					payment.set( "verified", true )
+						payment.set( "state", _state )
+						payment.set( "transaction", _transaction )
+						payment.set( "verified", true )
+					catch _err
+						@error( _err )
+						cb( _err )
+						return
 					payment.persist ( err )=>
 						if err
 							cb( err )
@@ -135,7 +144,7 @@ class ClickAndBuyMMS extends require( "../_base/main" )
 					return
 			catch _err
 				@error( _err )
-				res.send( "FAILED", 500 )
+				cb( _err )
 				return
 			return
 

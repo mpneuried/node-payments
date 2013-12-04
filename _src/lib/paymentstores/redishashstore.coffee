@@ -1,7 +1,7 @@
 _ = require( "lodash" )
 redis = require("redis")
 
-module.exports = class RedisHashStore extends require( "../lib/basic" )
+module.exports = class RedisHashStore extends require( "../basic" )
 
 	defaults: =>
 		return @extend super, 

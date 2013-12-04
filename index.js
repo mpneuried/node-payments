@@ -1,17 +1,19 @@
 (function() {
-  exports.version = '0.1.1';
+  module.exports = require('./lib/main');
 
-  exports.config = require('./lib/config');
+  module.exports.version = '0.1.3';
 
-  exports.Redirects = require('./lib/redirects');
+  module.exports.config = require('./lib/config');
 
-  exports.MemoryStore = require('./lib/paymentstores/memorystore');
+  module.exports.Redirects = require('./lib/redirects');
 
-  exports.providers = {
+  module.exports.MemoryStore = require('./lib/paymentstores/memorystore');
+
+  module.exports.RedisHashStore = require('./lib/paymentstores/redishashstore');
+
+  module.exports.providers = {
     Base: require('./providers/_base/.'),
     Paypal: require('./providers/paypal/.')
   };
-
-  module.exports = require('./lib/main');
 
 }).call(this);

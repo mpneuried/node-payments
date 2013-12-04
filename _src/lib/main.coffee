@@ -1,6 +1,7 @@
 config = require( "./config" )
 _ = require( "lodash" )
-_payments = require( "../." )
+Redirects = require( "./redirects" )
+MemoryStore = require( "./paymentstores/memorystore" )
 
 module.exports = class Payments extends require( "./basic" )
 	constructor: ( options )->
@@ -16,9 +17,9 @@ module.exports = class Payments extends require( "./basic" )
 
 		# init the payment store
 		if not options?.express? 
-			@redir = new _payments.Redirects( @ )
+			@redir = new Redirects( @ )
 		else
-			@redir = new _payments.Redirects( @, options.express )
+			@redir = new Redirects( @, options.express )
 
 		@providers = {}
 		# init internal providers
@@ -38,7 +39,7 @@ module.exports = class Payments extends require( "./basic" )
 
 		# init the payment store
 		if not options?.paymentStore?
-			@initPaymentStore( new _payments.MemoryStore() )
+			@initPaymentStore( new MemoryStore() )
 		else
 			@initPaymentStore( options.paymentStore )
 
