@@ -1,6 +1,4 @@
 _ = require( "lodash" )
-redis = require("redis")
-
 module.exports = class RedisHashStore extends require( "../basic" )
 
 	defaults: =>
@@ -21,6 +19,11 @@ module.exports = class RedisHashStore extends require( "../basic" )
 		if @config.redis?.constructor?.name is "RedisClient"
 			@redis = @config.redis
 		else
+			try
+				redis = require("redis")
+			catch _err
+				@error( "you have to load redis via `npm install redis hiredis`" )
+				return
 			@redis = redis.createClient( @config.port or 6379, @config.host or "127.0.0.1", @config.options or {} )
 
 		@connected = @redis.connected or false
