@@ -35,7 +35,7 @@ class ClickAndBuyMMS extends require( "../_base/main" )
 		_hs = "#{secret}#{_cleanXML}"
 		_hash = crypto.createHash('sha1').update( _hs ).digest('hex')
 
-		console.log _hash, sig, _cleanXML
+		#console.log _hash, sig, _cleanXML
 		if sig is _hash
 			return true
 		else

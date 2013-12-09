@@ -1,7 +1,7 @@
 (function() {
   module.exports = require('./lib/main');
 
-  module.exports.version = '0.1.4';
+  module.exports.version = '0.1.5';
 
   module.exports.config = require('./lib/config');
 

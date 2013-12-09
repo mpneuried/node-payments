@@ -1,9 +1,10 @@
 {
 	"author": "mp (www.tcs.de)",
 	"name": "node-payments",
-	"description": "A wrapper for differnet pament systems",
-	"version": "0.1.4",
+	"description": "node-payments is a express based facade to multiple payment services.",
+	"version": "0.1.5",
 	"homepage": "https://github.com/mpneuried/node-payments",
+	"keywords": [ "payment", "pay", "buy", "express", "fast", "simple", "paypal", "clickandbuy" ],
 	"private": false,
 	"repository": {
 		"type": "git",

@@ -407,6 +407,7 @@ module.exports = function(){
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.1.5|2013-12-09|Added npm keywords and used a better package description. Removed some console.log's.|
 |v0.1.4|2013-12-04|Fixed loading of redis in redishashstore if not used.|
 |v0.1.3|2013-12-04|Added detailed docs and some optimizations|
 |v0.1.2|2013-12-03|First offical working beta|
