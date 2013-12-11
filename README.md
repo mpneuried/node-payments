@@ -394,6 +394,12 @@ module.exports = function(){
 };
 ```
 
+# Attension
+
+### Paypal IPN encoding
+
+The Paypal IPN send's the IPN messages encoded as `windows-1251`. Usually Node is working with `utf-8` and the IPN receiver can not verify the messages succefully.
+After doing some search i found [this](http://jlchereau.blogspot.de/2006/10/paypal-ipn-with-utf8.html) article. So you have to change this within the paypal settings, but the Settings are no longer availibel via the GUI so use this link [https://www.paypal.com/ie/cgi-bin/webscr?cmd=_profile-language-encoding](https://www.paypal.com/ie/cgi-bin/webscr?cmd=_profile-language-encoding).
 
 ## TODO's
 
