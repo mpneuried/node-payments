@@ -12,8 +12,7 @@ path = require( "path" )
 # initialize a standard express
 express = require( "express" )
 app = express()
-app.use( express.urlencoded() )
-app.use( express.json() )
+app.use( express.bodyParser() )
 app.use( express.logger( "dev" ) )
 
 # get the local testing configuration

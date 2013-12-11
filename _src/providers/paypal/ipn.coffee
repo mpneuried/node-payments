@@ -17,6 +17,8 @@ class PayPalIpn extends require( "../_base/main" )
 		return
 
 	verify: ( req, res, next )=>
+		@debug "REQUEST INCOME", req.body
+
 		_formdata = _.extend( {}, req.body, cmd: "_notify-validate" )
 		_url = ( if @config.secure then "https://" else "http://" ) + @config.host + ( if not @config.port? or @config.port isnt 80 then ":" + @config.port else "" )
 		

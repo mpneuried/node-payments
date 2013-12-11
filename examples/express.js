@@ -16,9 +16,7 @@ http://localhost:8888/pay/paypal?amount=0.01&desc=Cup%20of%20coffee&userid=123
 
   app = express();
 
-  app.use(express.urlencoded());
-
-  app.use(express.json());
+  app.use(express.bodyParser());
 
   app.use(express.logger("dev"));
 

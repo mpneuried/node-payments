@@ -41,6 +41,7 @@
     PayPalIpn.prototype.verify = function(req, res, next) {
       var opt, _formdata, _url,
         _this = this;
+      this.debug("REQUEST INCOME", req.body);
       _formdata = _.extend({}, req.body, {
         cmd: "_notify-validate"
       });

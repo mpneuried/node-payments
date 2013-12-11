@@ -2,7 +2,7 @@
 	"author": "mp (www.tcs.de)",
 	"name": "node-payments",
 	"description": "node-payments is a express based facade to multiple payment services.",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"homepage": "https://github.com/mpneuried/node-payments",
 	"keywords": [ "payment", "pay", "buy", "express", "fast", "simple", "paypal", "clickandbuy" ],
 	"private": false,

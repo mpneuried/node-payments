@@ -43,6 +43,9 @@ class ClickAndBuyMMS extends require( "../_base/main" )
 
 
 	verify: ( req, res, next )=>
+
+		@debug "REQUEST INCOME", req.body
+
 		if not req.body.xml?
 			# if no payload exists is't just a ping to verify the availibility of this endpoint.
 			res.send( "OK" )

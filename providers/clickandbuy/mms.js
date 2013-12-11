@@ -70,6 +70,7 @@
 
     ClickAndBuyMMS.prototype.verify = function(req, res, next) {
       var _this = this;
+      this.debug("REQUEST INCOME", req.body);
       if (req.body.xml == null) {
         res.send("OK");
         return;
