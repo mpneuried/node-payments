@@ -2,7 +2,7 @@
 	"author": "mp (www.tcs.de)",
 	"name": "node-payments",
 	"description": "node-payments is a express based facade to multiple payment services.",
-	"version": "0.1.6",
+	"version": "0.1.7",
 	"homepage": "https://github.com/mpneuried/node-payments",
 	"keywords": [ "payment", "pay", "buy", "express", "fast", "simple", "paypal", "clickandbuy" ],
 	"private": false,
@@ -18,26 +18,26 @@
 		"test": "grunt test"
 	},
 	"dependencies": {
-		"paypal-rest-sdk": "*",
-		"uuid": "*",
-		"lodash": "*",
-		"extend": "*",
-		"request": "*",
-		"colors": "*",
-		"moment": "*",
-		"xml2js": "*",
-		"async": "*"
+		"paypal-rest-sdk": "0.6.x",
+		"uuid": "1.4.x",
+		"lodash": "2.4.x",
+		"extend": "1.2.x",
+		"request": "2.30.x",
+		"colors": "0.6.x",
+		"moment": "2.5.x",
+		"xml2js": "0.4.x",
+		"async": "0.2.x"
 	},
 	"devDependencies": {
-		"should": "*",
+		"should": "2.1.x",
 		"grunt": "0.4.x",
 
-		"grunt-regarde": "*",
-		"grunt-contrib-coffee": "*",
-		"grunt-include-replace": "*",
-		"grunt-mocha-cli": "*",
+		"grunt-regarde": "0.1.x",
+		"grunt-contrib-coffee": "0.8.x",
+		"grunt-include-replace": "1.2.x",
+		"grunt-mocha-cli": "1.4.x",
 
-		"express": "*",
-		"redis": "*"
+		"express": "3.4.x",
+		"redis": "0.10.x"
 	}
 }

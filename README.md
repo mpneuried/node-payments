@@ -413,6 +413,7 @@ After doing some search i found [this](http://jlchereau.blogspot.de/2006/10/payp
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|v0.1.7|2016-05-24|Fixed npm versions to match the latest development date in dez. 2013|
 |v0.1.5|2013-12-09|Added npm keywords and used a better package description. Removed some console.log's.|
 |v0.1.4|2013-12-04|Fixed loading of redis in redishashstore if not used.|
 |v0.1.3|2013-12-04|Added detailed docs and some optimizations|
